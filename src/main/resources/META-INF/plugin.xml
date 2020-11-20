@@ -1,0 +1,29 @@
+<idea-plugin>
+    <id>com.daimler.sechub.sechub-plugin-intellij</id>
+    <name>SecHub</name>
+    <vendor url="https://www.daimler-tss.com/">Daimler TSS GmbH</vendor>
+
+    <description><![CDATA[
+    <a href="https://github.com/Daimler/sechub-plugin-intellij">GitHub project page</a><br>
+    <h3>About</h3>
+    <a href="https://github.com/Daimler/sechub">SecHub</a> intelliJ plugin. Provides a comfortable way to handle
+    SecHub reports inside IntelliJ
+    ]]></description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <toolWindow id="SecHub" icon="/icons/toolWindowSecHub.svg" factoryClass="com.daimler.sechub.window.SecHubToolWindowFactory"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="com.daimler.sechub.action.SechubImportAction" class="com.daimler.sechub.action.SechubImportAction"
+                text="Import SecHub Report" description="Import an SecHub Report JSON file into IDE">
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+        </action>
+    </actions>
+</idea-plugin>

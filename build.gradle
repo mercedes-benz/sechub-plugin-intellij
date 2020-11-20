@@ -1,0 +1,63 @@
+// SPDX-License-Identifier: MIT
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij' version '0.4.20'
+
+
+    id 'org.asciidoctor.jvm.convert' version '3.1.0'
+}
+
+group 'com.daimler.sechub'
+version '0.1.2'
+
+repositories {
+
+    // intellij plugin adds www.jetbrains.com/intellij-repository/releases in a redirected way over
+    // https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/releases
+    mavenCentral()
+}
+
+
+sourceSets{
+    main{
+        java{
+            srcDirs 'src/main/java', 'src/main/java-intellij'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'lib')
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version '2020.2.3'
+}
+
+patchPluginXml {
+    changeNotes """
+      This is the initial plugin version<br>
+      <em>currently no special notes</em>"""
+}
+
+publishPlugin {
+    token = System.getenv("SECHUB_INTELLIJ_PUBLISH_TOKEN")
+    channels 'alpha'
+}
+
+asciidoctor {
+    baseDirFollowsSourceDir()
+    sources {
+        include 'user-guide.adoc'
+    }
+    outputDir  file('build/docs/asciidoc')
+}
+
+task listrepos {
+    doLast {
+        println "List of repos:"
+        project.repositories.each { println "Name: '" + it.name + "' - URL: " + it.url }
+    }
+}
