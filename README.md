@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: MIT -->
 # SecHub IntelliJ Plugin
-![SecHub Logo](https://github.com/Daimler/sechub-plugin-intellij/blob/master/src/main/resources/icons/sechub-logo.png)
+![SecHub Logo](https://github.com/Daimler/sechub-plugin-intellij/blob/master/other/images/sechub-logo-big.png)
 
 ## Intended Usage
 
