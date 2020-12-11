@@ -1,6 +1,7 @@
 <!-- SPDX-License-Identifier: MIT -->
 # SecHub IntelliJ Plugin
-![SecHub Logo](https://github.com/Daimler/sechub-plugin-intellij/blob/master/src/main/resources/icons/sechub-logo.png
+![SecHub Logo](https://github.com/Daimler/sechub-plugin-intellij/blob/master/src/main/resources/icons/sechub-logo.png)
+
 ## Intended Usage
 
 This is an IntelliJ plugin for a convenient IDE integration of [SecHub](https://github.com/daimler/sechub)  
