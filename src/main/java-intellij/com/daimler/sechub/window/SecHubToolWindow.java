@@ -5,6 +5,7 @@ import com.daimler.sechub.commons.model.TrafficLight;
 import com.daimler.sechub.model.FileLocationExplorer;
 import com.daimler.sechub.model.FindingModel;
 import com.daimler.sechub.model.FindingNode;
+import com.daimler.sechub.ui.SecHubToolWindowUIContext;
 import com.daimler.sechub.ui.SecHubToolWindowUISupport;
 import com.daimler.sechub.ui.SecHubTreeNode;
 import com.daimler.sechub.util.ErrorLogger;
@@ -61,6 +62,7 @@ public class SecHubToolWindow {
     private JSplitPane mainSplitPane;
     private JLabel reportSourceCodeLabel;
     private JSplitPane callHierarchySplitPane;
+    private JLabel cweIdLabel;
     private FindingModel model;
 
 
@@ -68,7 +70,15 @@ public class SecHubToolWindow {
         //mainSplitPane.setDividerLocation(0.5);
         iconCallHierarchyElement= IconLoader.findIcon("/icons/activity.png");
         callHierarchySplitPane.setDividerLocation(0.5);
-        support = new SecHubToolWindowUISupport(reportTable,callHierarchyTree, callStepDetailTable, ErrorLogger.getInstance());
+        SecHubToolWindowUIContext context = new SecHubToolWindowUIContext();
+        context.findingTable=reportTable;
+        context.callHierarchyTree=callHierarchyTree;
+        context.callHierarchyDetailTable=callStepDetailTable;
+        context.errorLog=ErrorLogger.getInstance();
+        context.cweIdLabel =cweIdLabel;
+
+        support = new SecHubToolWindowUISupport(context);
+
         support.addCallStepChangeListener((callStep)->{
             reportSourceCodeTextArea.setText(callStep == null ? "" : SimpleStringUtil.toStringTrimmed(callStep.getSource()));
             /* now show in editor as well */

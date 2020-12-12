@@ -35,12 +35,14 @@ public class SecHubFindingToFindingModelTransformer {
 		int id = finding.getId();
 		int callStackStep = 1;
 		String description = finding.getName();
+		Integer cweId = finding.getCweId();
 
 		SecHubCodeCallStack code = finding.getCode();
 
 		/* @formatter:off */
 		FindingNodeBuilder builder = FindingNode.builder().
 				setId(id).
+				setCweId(cweId).
 				setCallStackStep(callStackStep++).
 				setColumn(code.getColumn()).
 				setLine(code.getLine()).
@@ -67,7 +69,7 @@ public class SecHubFindingToFindingModelTransformer {
 					setRelevantPart(code.getRelevantPart()).
 					setDescription(EMPTY).
 					setSeverity(null).
-				build();
+					build();
 			/* @formatter:on */
 			parent.addChild(child);
 			parent = child; // for next call this is the parent
@@ -76,7 +78,7 @@ public class SecHubFindingToFindingModelTransformer {
 
 	private FindingModel createRootNodeWithChildren(Map<Severity, List<FindingNode>> map) {
 		FindingModel model = new FindingModel();
-		
+
 		/* Add first level nodes, to model - sorted by severity */
 		List<Severity> severitySortedCriticalFirst = Arrays.asList(Severity.values());
 		Collections.reverse(severitySortedCriticalFirst);

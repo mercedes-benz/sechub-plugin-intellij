@@ -5,17 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JTree;
+import javax.swing.*;
 
 import com.daimler.sechub.commons.model.Severity;
 import com.daimler.sechub.model.FindingModel;
@@ -66,9 +56,14 @@ public class SecHubToolWindowUISupportTestMain {
 
 			callHierarchyTree.setPreferredSize(new Dimension(800, 600));
 
-			supportToTest = new SecHubToolWindowUISupport(reportTable, callHierarchyTree, callStepDetailTable,
-					new ErrorLog() {
-					});
+			SecHubToolWindowUIContext context = new SecHubToolWindowUIContext();
+			context.findingTable=reportTable;
+			context.callHierarchyDetailTable=callStepDetailTable;
+			context.callHierarchyTree=callHierarchyTree;
+			context.errorLog=new ErrorLog() {
+			};
+			context.cweIdLabel = new JLabel("cwe");
+			supportToTest = new SecHubToolWindowUISupport(context);
 			supportToTest.initialize();
 			frame.pack();
 			frame.setVisible(true);

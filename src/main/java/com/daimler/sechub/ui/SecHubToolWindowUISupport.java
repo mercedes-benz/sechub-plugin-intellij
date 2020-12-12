@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: MIT
 package com.daimler.sechub.ui;
 
-import java.awt.Dimension;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.JTable;
-import javax.swing.JTree;
-import javax.swing.ListSelectionModel;
-import javax.swing.table.TableColumnModel;
-
 import com.daimler.sechub.model.FindingModel;
 import com.daimler.sechub.model.FindingNode;
 import com.daimler.sechub.util.ErrorLog;
 import com.daimler.sechub.util.JTreeUtil;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
+import javax.swing.table.TableColumnModel;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URI;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Because its very inconvenient and slow to test and develop the toolwindow
@@ -30,17 +29,20 @@ public class SecHubToolWindowUISupport {
 	private final JTree callHierarchyTree;
 	private final JTable callStepDetailTable;
 	private final ErrorLog errorLog;
+	private final JLabel cweIdLabel;
+	private final SecHubToolWindowUIContext context;
+
 	private FindingModel model;
 	private Set<CallStepChangeListener> callStepChangeListeners;
 	private Set<ReportFindingSelectionChangeListener> reportFindingSelectionChangeListeners;
 
-	public SecHubToolWindowUISupport(JTable findingTable, JTree callHierarchyTree, JTable callHierarchyDetailTable,
-			ErrorLog errorLog) {
-		this.reportTable = findingTable;
-		this.callHierarchyTree = callHierarchyTree;
-		this.callStepDetailTable = callHierarchyDetailTable;
-		this.errorLog = errorLog;
-
+	public SecHubToolWindowUISupport(SecHubToolWindowUIContext context) {
+		this.context=context;
+		this.reportTable = context.findingTable;
+		this.callHierarchyTree = context.callHierarchyTree;
+		this.callStepDetailTable = context.callHierarchyDetailTable;
+		this.errorLog = context.errorLog;
+		this.cweIdLabel=context.cweIdLabel;
 		this.callStepChangeListeners = new LinkedHashSet<>();
 		this.reportFindingSelectionChangeListeners = new LinkedHashSet<>();
 	}
@@ -70,9 +72,41 @@ public class SecHubToolWindowUISupport {
 	}
 
 	public void initialize() {
+		initCweIdLink();
 		initReportTable();
 		initCallHierarchyTree();
 		initCallStepDetailTable();
+	}
+
+	private void initCweIdLink() {
+		setCweId(null);
+		cweIdLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		cweIdLabel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Integer cweId = context.currentSelectedCweId;
+				if (cweId ==null){
+					return;
+				}
+				Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+				if (desktop==null){
+					return;
+				}
+				String uriAsText = createMitreCweDescriptionLink(cweId);
+
+				try{
+					URI uri = new URI(uriAsText);
+					desktop.browse(uri);
+				} catch (Exception exception) {
+					context.errorLog.error("Was not able to open URI:"+ uriAsText,exception);
+				}
+			}
+		});
+	}
+
+	@NotNull
+	private String createMitreCweDescriptionLink(Integer cweId) {
+		return "https://cwe.mitre.org/data/definitions/" + cweId + ".html";
 	}
 
 	private void initCallStepDetailTable() {
@@ -148,15 +182,28 @@ public class SecHubToolWindowUISupport {
 		}
 	}
 
+	private void setCweId(Integer cweId){
+		context.currentSelectedCweId =cweId;
+		if (cweId==null){
+			cweIdLabel.setVisible(false);
+			return;
+		}
+		cweIdLabel.setText("<html><a href=\""+ createMitreCweDescriptionLink(cweId)+"\">CWE-ID "+cweId+"</a></html>");
+		cweIdLabel.setToolTipText("Open "+ createMitreCweDescriptionLink(cweId)+ " in external browser");
+		cweIdLabel.setVisible(true);
+	}
+
 	private void showFinding(FindingNode finding) {
 		SechubTreeModel treeModel = (SechubTreeModel) callHierarchyTree.getModel();
 		SecHubRootTeeNode newRootNode = new SecHubRootTeeNode();
 
 		if (finding == null) {
 			treeModel.setRoot(newRootNode);
+			setCweId(null);
 			showCallStep(null);
 			return;
 		}
+		setCweId(finding.getCweId());
 
 		buildTreeNodes(newRootNode, finding);
 		treeModel.setRoot(newRootNode);
