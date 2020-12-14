@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 package com.daimler.sechub.action;
-
+import static com.daimler.sechub.compatiblity.VirtualFileCompatibilityLayer.*;
 import com.daimler.sechub.SecHubReportImporter;
+import com.daimler.sechub.compatiblity.VirtualFileCompatibilityLayer;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -37,7 +38,7 @@ public class SechubImportAction extends AnAction {
         if (file==null){
             return;
         }
-        @NotNull Path p = file.toNioPath();
+        @NotNull Path p = toNioPath(file);
         try {
             SecHubReportImporter.getInstance().importAndDisplayReport(p.toFile());
         } catch (IOException e) {

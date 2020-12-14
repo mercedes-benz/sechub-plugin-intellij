@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 package com.daimler.sechub.window;
+import static com.daimler.sechub.compatiblity.VirtualFileCompatibilityLayer.*;
 
 import com.daimler.sechub.commons.model.TrafficLight;
 import com.daimler.sechub.model.FileLocationExplorer;
@@ -154,7 +155,8 @@ public class SecHubToolWindow {
         if (projectDir==null){
             return;
         }
-        explorer.getSearchFolders().add(projectDir.toNioPath());
+
+        explorer.getSearchFolders().add(toNioPath(projectDir));
 
         List<Path> pathes = null;
         try {
@@ -171,7 +173,7 @@ public class SecHubToolWindow {
             LOG.warn("Multiple pathes found useing only first one");
         }
         Path first = pathes.get(0);
-        @Nullable VirtualFile firstAsVirtualFile = VirtualFileManager.getInstance().findFileByNioPath(first);
+        @Nullable VirtualFile firstAsVirtualFile = VirtualFileManager.getInstance().findFileByUrl(first.toUri().toString());
         if (firstAsVirtualFile == null) {
             LOG.error("Found in normal filesystem but not in virutal one:" + first);
             return;
