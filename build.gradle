@@ -35,6 +35,12 @@ dependencies {
 intellij {
     // we chose 2020.1 - to have compatibility to Android Studio 4.1
     version '2020.1'
+
+
+    patchPluginXml {
+        sinceBuild '201'
+        untilBuild ''
+    }
 }
 
 patchPluginXml {

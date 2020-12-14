@@ -14,7 +14,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: "Clean build"
+    - name: "Build plugin"
       run: ./gradlew buildPlugin
     - name: "Documentations"
       run: ./gradlew asciidoc
