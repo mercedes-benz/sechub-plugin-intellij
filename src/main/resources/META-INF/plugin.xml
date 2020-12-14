@@ -16,14 +16,14 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <toolWindow id="SecHub" icon="/icons/toolWindowSecHub.svg" factoryClass="com.daimler.sechub.window.SecHubToolWindowFactory"/>
+        <toolWindow id="SecHub" icon="/icons/toolWindowSecHub.svg" factoryClass="com.daimler.sechub.window.SecHubToolWindowFactory" anchor="left"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
         <action id="com.daimler.sechub.action.SechubImportAction" class="com.daimler.sechub.action.SechubImportAction"
                 text="Import SecHub Report" description="Import an SecHub Report JSON file into IDE">
-            <add-to-group group-id="ToolsMenu" anchor="first"/>
+            <add-to-group group-id="ToolsMenu" anchor="first" />
         </action>
     </actions>
 </idea-plugin>

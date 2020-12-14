@@ -15,7 +15,7 @@ public class SecHubToolWindowFactory implements ToolWindowFactory {
 
         SecHubToolWindow secHubToolWindow = new SecHubToolWindow(toolWindow);
         SecHubToolWindow.registerInstance(secHubToolWindow);
-        Content content = contentFactory.createContent(secHubToolWindow.getContent(), "", false);
+        Content content = contentFactory.createContent(secHubToolWindow.getContent(), "SecHub", false);
 
         toolWindow.getContentManager().addContent(content);
     }
