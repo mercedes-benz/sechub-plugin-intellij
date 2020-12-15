@@ -1,4 +1,6 @@
 <!-- SPDX-License-Identifier: MIT -->
+![Java build](https://github.com/Daimler/sechub-plugin-intellij/workflows/Java%20build/badge.svg)
+
 # SecHub IntelliJ Plugin
 ![SecHub Logo](https://github.com/Daimler/sechub-plugin-intellij/blob/master/other/images/sechub-logo-big.png)
 
