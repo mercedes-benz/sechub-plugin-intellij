@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.4.20'
+    id 'org.jetbrains.intellij' version '1.1.4'
 
 
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
