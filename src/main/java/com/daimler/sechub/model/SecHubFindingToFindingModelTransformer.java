@@ -30,7 +30,8 @@ public class SecHubFindingToFindingModelTransformer {
 	private void addNodesToMapForFinding(Map<Severity, List<FindingNode>> map, SecHubFinding finding) {
 		Severity severity = finding.getSeverity();
 
-		List<FindingNode> list = map.computeIfAbsent(severity, SecHubFindingToFindingModelTransformer::createFindingNodeList);
+		List<FindingNode> list = map.computeIfAbsent(severity,
+				SecHubFindingToFindingModelTransformer::createFindingNodeList);
 
 		int id = finding.getId();
 		int callStackStep = 1;
@@ -38,6 +39,9 @@ public class SecHubFindingToFindingModelTransformer {
 		Integer cweId = finding.getCweId();
 
 		SecHubCodeCallStack code = finding.getCode();
+		if (code == null) {
+			return;
+		}
 
 		/* @formatter:off */
 		FindingNodeBuilder builder = FindingNode.builder().

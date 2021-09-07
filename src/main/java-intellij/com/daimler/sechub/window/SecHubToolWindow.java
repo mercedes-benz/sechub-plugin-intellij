@@ -2,6 +2,7 @@
 package com.daimler.sechub.window;
 import static com.daimler.sechub.compatiblity.VirtualFileCompatibilityLayer.*;
 
+import com.daimler.sechub.SecHubReportViewUpdater;
 import com.daimler.sechub.commons.model.TrafficLight;
 import com.daimler.sechub.model.FileLocationExplorer;
 import com.daimler.sechub.model.FindingModel;
@@ -35,10 +36,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class SecHubToolWindow {
+    private static final Logger LOG = Logger.getInstance(SecHubToolWindow.class);
 
     private final SecHubToolWindowUISupport support;
     private Icon iconCallHierarchyElement;
-    private static final Logger LOG = Logger.getInstance(SecHubToolWindow.class);
 
     private static SecHubToolWindow INSTANCE;
 
@@ -127,6 +128,7 @@ public class SecHubToolWindow {
     }
 
     public static void registerInstance(SecHubToolWindow secHubToolWindow) {
+        LOG.info("register tool windows instance:"+secHubToolWindow);
         INSTANCE = secHubToolWindow;
     }
 

@@ -52,7 +52,7 @@ public class SecHubReportImporter {
             model.setJobUUID(report.getJobUUID());
             model.setTrafficLight(report.getTrafficLight());
 
-            secHubReportViewUpdater.updateReportViewInSWTThread(report.getJobUUID(), report.getTrafficLight(), model);
+            secHubReportViewUpdater.updateReportViewInAWTThread(report.getJobUUID(), report.getTrafficLight(), model);
 
         } catch (SecHubReportException e) {
             throw new IOException("An error occured while reading the report: " + absolutePath
