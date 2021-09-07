@@ -40,7 +40,11 @@ public class SecHubFindingToFindingModelTransformer {
 
 		SecHubCodeCallStack code = finding.getCode();
 		if (code == null) {
-			return;
+
+			code = new SecHubCodeCallStack(); // fallback when no code call stack available
+
+			code.setColumn(0); // must do this, otherwise NPE by auto boxing null values
+			code.setLine(0);
 		}
 
 		/* @formatter:off */

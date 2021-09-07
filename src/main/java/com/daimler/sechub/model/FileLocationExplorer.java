@@ -35,6 +35,9 @@ public class FileLocationExplorer {
 	 */
 	public List<Path> searchFor(String location) throws IOException {
 		List<Path> result = new ArrayList<>();
+		if (location == null) {
+			return result;
+		}
 
 		FileSystem defaultFileSystem = FileSystems.getDefault();
 		String separator = defaultFileSystem.getSeparator();
@@ -51,15 +54,18 @@ public class FileLocationExplorer {
 	}
 
 	/**
-	 * Converts given location to OS specific location Java regular expression. E.g. when
-	 * separator is '\' (windows), a location like 'src/main/java/Test1.java' will
-	 * be transformed to 'src\\main\\java\\Test1.java'.
+	 * Converts given location to OS specific location Java regular expression. E.g.
+	 * when separator is '\' (windows), a location like 'src/main/java/Test1.java'
+	 * will be transformed to 'src\\main\\java\\Test1.java'.
 	 *
 	 * @param location
 	 * @param separator
 	 * @return OS specific location
 	 */
 	String convertLocationOSSpecificRegExp(String location, String separator) {
+		if (location == null) {
+			return null;
+		}
 		String target = location;
 		if ("\\".equals(separator)) {
 			Matcher matcher = PATTERN_ALL_SLASHES.matcher(target);
