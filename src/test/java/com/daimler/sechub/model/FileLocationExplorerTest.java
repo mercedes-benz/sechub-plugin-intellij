@@ -21,6 +21,24 @@ public class FileLocationExplorerTest {
         explorerToTest = new FileLocationExplorer();
     }
 
+    /* ----------------------------------------------- */
+    /* ------------- REGEXP creation tests ----------- */
+    /* ----------------------------------------------- */
+
+    @Test
+    public void path_contains_plusplus_is_correctly_handled() throws Exception{
+
+        /* prepare */
+        String location = "src/main/C++/os_injection.cpp";
+
+        /* execute */
+        String osSpecificLocation = explorerToTest.convertLocationOSSpecificRegExp(location, "\\");
+
+        /* test */
+        // remark: \Q start Quoting inside java regexp, \E ends it
+        assertEquals("\\Qsrc\\main\\C++\\os_injection.cpp\\E",osSpecificLocation);
+    }
+
     @Test
     public void location_converted_from_unix_to_windows_style_when_separator_is_backslash() throws Exception{
 
@@ -31,7 +49,7 @@ public class FileLocationExplorerTest {
         String osSpecificLocation = explorerToTest.convertLocationOSSpecificRegExp(location, "\\");
 
         /* test */
-        assertEquals("src\\\\main\\\\java\\\\com\\\\example\\\\Test1.java",osSpecificLocation);
+        assertEquals("\\Qsrc\\main\\java\\com\\example\\Test1.java\\E",osSpecificLocation);
     }
 
     @Test
@@ -44,9 +62,12 @@ public class FileLocationExplorerTest {
         String osSpecificLocation = explorerToTest.convertLocationOSSpecificRegExp(location, "/");
 
         /* test */
-        assertEquals("src/main/java/com/example/Test1.java",osSpecificLocation);
+        assertEquals("\\Qsrc/main/java/com/example/Test1.java\\E",osSpecificLocation);
     }
 
+    /* ----------------------------------------------- */
+    /* ------------- SearchFor implementation tests -- */
+    /* ----------------------------------------------- */
     @Test
     public void scenario1_projects_TestMe_java_found() throws Exception {
         /* prepare */
@@ -163,6 +184,23 @@ public class FileLocationExplorerTest {
         assertTrue(found.contains(expectedFile1));
         assertTrue(found.contains(expectedFile2));
         assertFalse(found.contains(unExpectedFile3));
+    }
+
+    @Test
+    public void scenario2_projects_cpp_os_injection_cpp_found() throws Exception {
+        /* prepare */
+        Path project1 = getEnsuredTestPath("explorer/scenario2/project1");
+        Path expectedFile = getEnsuredTestPath("explorer/scenario2/project1/Code/c++/os_injection.cpp");
+
+        explorerToTest.getSearchFolders().add(project1);
+
+        /* execute */
+        String locationString = "os_injection.cpp";
+        List<Path> found = explorerToTest.searchFor(locationString);
+
+        /* test */
+        assertEquals(1,found.size());
+        assertEquals(expectedFile, found.get(0));
     }
 
 

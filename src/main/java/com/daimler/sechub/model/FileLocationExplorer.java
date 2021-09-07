@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 public class FileLocationExplorer {
 
-	private static final Pattern PATTERN_ALL_SLASHES=Pattern.compile("\\/");
+	private static final Pattern PATTERN_ALL_SLASHES = Pattern.compile("\\/");
 
 	private List<Path> searchFolders = new ArrayList<>();
 
@@ -28,7 +28,8 @@ public class FileLocationExplorer {
 	/**
 	 * Searches for given location string
 	 *
-	 * @param location represents known location to search for inside defined search folders
+	 * @param location represents known location to search for inside defined search
+	 *                 folders
 	 * @return list of matching files, never <code>null</code>
 	 * @throws IOException
 	 */
@@ -43,33 +44,39 @@ public class FileLocationExplorer {
 		PathMatcher matcher = defaultFileSystem.getPathMatcher("regex:.*" + osSpecificPathLocationRegexp);
 
 		for (Path searchFolder : searchFolders) {
-			searchFilesRecursive(matcher, searchFolder,result);
+			searchFilesRecursive(matcher, searchFolder, result);
 		}
 
 		return result;
 	}
 
 	/**
-	 * Converts given location to OS specific location java regexp. E.g. when seperator is '\' (windows), a location
-	 * like 'src/main/java/Test1.java' will be transformed to 'src\\main\\java\\Test1.java'.
+	 * Converts given location to OS specific location Java regular expression. E.g. when
+	 * separator is '\' (windows), a location like 'src/main/java/Test1.java' will
+	 * be transformed to 'src\\main\\java\\Test1.java'.
+	 *
 	 * @param location
 	 * @param separator
 	 * @return OS specific location
 	 */
 	String convertLocationOSSpecificRegExp(String location, String separator) {
-		if ("\\".equals(separator) ) {
-			Matcher matcher = PATTERN_ALL_SLASHES.matcher(location);
+		String target = location;
+		if ("\\".equals(separator)) {
+			Matcher matcher = PATTERN_ALL_SLASHES.matcher(target);
 			if (matcher.find()) {
-				return matcher.replaceAll("\\\\\\\\");
+				target = matcher.replaceAll("\\\\");
 			}
 		}
-		return location;
+		// we quote the target - so special characters (e.g. +) are not accidently
+		// handled as regular expression meta data.
+		String quoted = Pattern.quote(target);
+		return quoted;
 	}
 
 	void searchFilesRecursive(PathMatcher matcher, Path searchFolder, List<Path> result) throws IOException {
 
 		Collection<Path> found = find(searchFolder, matcher);
-		for (Path path: found) {
+		for (Path path : found) {
 			result.add(path);
 		}
 	}
