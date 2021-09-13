@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: MIT
+import org.jetbrains.changelog.ExtensionsKt
+import java.text.SimpleDateFormat
+
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version '0.4.20'
+    // see https://github.com/JetBrains/gradle-intellij-plugin and
+    // https://plugins.gradle.org/plugin/org.jetbrains.intellij
+    id 'org.jetbrains.intellij' version '1.1.6'
 
+    // https://github.com/JetBrains/gradle-changelog-plugin#initializechangelog
+    id("org.jetbrains.changelog") version "1.2.1"
 
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
-
-group 'com.daimler.sechub'
-version '0.2.1'
 
 repositories {
 
@@ -17,6 +21,16 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'lib')
+    testCompile group: 'junit', name: 'junit', version: '4.13.2'
+}
+
+apply plugin: "org.jetbrains.intellij"
+// apply plugin: 'org.jetbrains.changelog'
+
+group 'com.daimler.sechub'
+version '0.3.0'
 
 sourceSets{
     main{
@@ -26,32 +40,37 @@ sourceSets{
     }
 }
 
-dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'lib')
-    testCompile group: 'junit', name: 'junit', version: '4.13.2'
-}
-
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    // we chose 2020.1 - to have compatibility to Android Studio 4.1
-    version '2020.1'
-
-
-    patchPluginXml {
-        sinceBuild '201'
-        untilBuild ''
-    }
+    // we chose 2020.3 - to have compatibility to Android Studio
+    // https://developer.android.com/studio/releases/#arctic-fox
+    version= '2020.3'
 }
 
+/*
+ // changenotes plugin does currently not work well in combination
+ // with intellij plugin 1.1.6 - so currently not used
+tasks {
+    patchPluginXml {
+        changeNotes.set({ changelog.getLatest().toHTML() })
+    }
+}
+*/
+
 patchPluginXml {
-    changeNotes """
-      This is the initial plugin version<br>
-      <em>currently no special notes</em>"""
+    sinceBuild = '201'
+    untilBuild =''
+}
+
+signPlugin {
+    certificateChain = System.getenv("SECHUB_CERTIFICATE_CHAIN")
+    privateKey = System.getenv("SECHUB_PRIVATE_KEY")
+    password = System.getenv("SECHUB_PRIVATE_KEY_PASSWORD")
 }
 
 publishPlugin {
     token = System.getenv("SECHUB_INTELLIJ_PUBLISH_TOKEN")
-    channels 'alpha'
+    channels = ['alpha']
 }
 
 asciidoctor {
@@ -62,9 +81,15 @@ asciidoctor {
     outputDir  file('build/docs/asciidoc')
 }
 
-task listrepos {
-    doLast {
-        println "List of repos:"
-        project.repositories.each { println "Name: '" + it.name + "' - URL: " + it.url }
-    }
+/*
+changelog {
+    version = "0.3.0"
+    path = "${project.projectDir}/CHANGELOG.md"
+    header = "[${-> version.get()}] - ${new SimpleDateFormat("yyyy-MM-dd").format(new Date())}"
+    headerParserRegex = ~/\d+\.\d+/
+    itemPrefix = "-"
+    keepUnreleasedSection = true
+    unreleasedTerm = "[Unreleased]"
+    groups = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"]
 }
+ */
