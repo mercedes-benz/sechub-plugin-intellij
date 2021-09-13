@@ -7,6 +7,7 @@ import com.intellij.openapi.diagnostic.Logger;
 
 import javax.swing.*;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
@@ -15,9 +16,10 @@ import java.util.List;
 public class SecHubToolWindowTransferSupport extends TransferHandler {
     private final ErrorLog errorLog;
 
-    public SecHubToolWindowTransferSupport(ErrorLog errorLog){
-        this.errorLog=errorLog;
+    public SecHubToolWindowTransferSupport(ErrorLog errorLog) {
+        this.errorLog = errorLog;
     }
+
     public boolean canImport(TransferSupport support) {
         if (!support.isDrop()) {
             // only supporting drop here
@@ -36,28 +38,22 @@ public class SecHubToolWindowTransferSupport extends TransferHandler {
         if (!canImport(support)) {
             return false;
         }
-
-        // fetch the drop location
-        JTable.DropLocation dl = (JTable.DropLocation) support
-                .getDropLocation();
-
-        int row = dl.getRow();
-
-        // fetch the data and bail if this fails
+        // Handle transfer
+        Transferable transferable = support.getTransferable();
+        DataFlavor flavor = DataFlavor.javaFileListFlavor;
         List<File> files;
         try {
-            files = (List<File>) support.getTransferable().getTransferData(
-                    DataFlavor.javaFileListFlavor);
+            files = (List<File>) transferable.getTransferData(flavor);
         } catch (UnsupportedFlavorException e) {
             return false;
         } catch (IOException e) {
             return false;
         }
-        if (files.size()==0){
+        if (files.size() == 0) {
             errorLog.warn("File array is 0 - so ignored");
             return false;
         }
-        if (files.size()>1){
+        if (files.size() > 1) {
             errorLog.warn("File array is greater than 1 - so import only first file. Others are ignored!");
         }
         File file = files.get(0);
@@ -66,7 +62,7 @@ public class SecHubToolWindowTransferSupport extends TransferHandler {
             SecHubReportImporter.getInstance().importAndDisplayReport(file);
             return true;
         } catch (IOException e) {
-            errorLog.error("Was not able to import",e);
+            errorLog.error("Was not able to import", e);
             return false;
         }
     }

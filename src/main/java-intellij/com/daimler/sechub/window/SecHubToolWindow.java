@@ -96,10 +96,13 @@ public class SecHubToolWindow {
 
     }
     private void installDragAndDrop() {
-        reportTable.setTransferHandler(new SecHubToolWindowTransferSupport(ErrorLogger.getInstance()));
-        // unfortunately necessary to get drag and drop working with empty tables:
-        // see https://docs.oracle.com/javase/tutorial/uiswing/dnd/emptytable.html
-       // reportTable.setFillsViewportHeight(true);
+        SecHubToolWindowTransferSupport transferHandler = new SecHubToolWindowTransferSupport(ErrorLogger.getInstance());
+        reportTable.setTransferHandler(transferHandler);
+        callHierarchyTree.setTransferHandler(transferHandler);
+
+        sechubToolWindowContent.setTransferHandler(transferHandler);
+        reportSourceCodeTextArea.setTransferHandler(transferHandler);
+        callStepDetailTable.setTransferHandler(transferHandler);
     }
 
     private void customizeCallHierarchyTree() {
