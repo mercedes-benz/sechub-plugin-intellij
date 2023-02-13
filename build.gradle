@@ -6,7 +6,7 @@ plugins {
     id 'java'
     // see https://github.com/JetBrains/gradle-intellij-plugin and
     // https://plugins.gradle.org/plugin/org.jetbrains.intellij
-    id 'org.jetbrains.intellij' version '1.1.6'
+    id 'org.jetbrains.intellij' version '1.13.0'
 
     // https://github.com/JetBrains/gradle-changelog-plugin#initializechangelog
     id("org.jetbrains.changelog") version "1.2.1"
