@@ -23,14 +23,21 @@ repositories {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'lib')
-    testCompile group: 'junit', name: 'junit', version: '4.13.2'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
 apply plugin: "org.jetbrains.intellij"
 // apply plugin: 'org.jetbrains.changelog'
 
-group 'com.daimler.sechub'
+group 'com.mercedesbenz.sechub'
 version '0.3.0'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+tasks.withType(JavaCompile) {
+    options.release = 8
+}
 
 sourceSets{
     main{
