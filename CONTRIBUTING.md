@@ -10,6 +10,10 @@ By contributing you will agree that your contribution will be put under the same
 - Contributions
 - Quality
 
+## CLA
+
+Please sign our [Contributor's License Agreement](https://github.com/mercedes-benz/foss/blob/master/CONTRIBUTORS_LICENSE_AGREEMENT.md) otherwise we cannot accept your contribution.
+
 ## Communication
 
 For communication please respect our [FOSS Code of Conduct](https://github.com/mercedes-benz/foss/blob/master/CODE_OF_CONDUCT.md).
