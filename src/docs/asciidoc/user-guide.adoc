@@ -8,14 +8,14 @@
 
 
 == About
-This is an IntelliJ plugin for a convenient IDE integration of https://github.com/daimler/sechub[SecHub]
+This is an IntelliJ plugin for a convenient IDE integration of https://github.com/mercedes-benz/sechub[SecHub]
 
-The project website can be found at https://github.com/daimler/sechub-plugin-intellij[SecHub Plugin IntelliJ]
+The project website can be found at https://github.com/mercedes-benz/sechub-plugin-intellij[SecHub Plugin IntelliJ]
 Marketplace entry available at https://plugins.jetbrains.com/plugin/15424-sechub[IntelliJ Plugin Page]
 
 == Features
 Here you will find all implemented features of the plugin. Planned features and ideas can be found at
-https://github.com/Daimler/sechub-plugin-intellij/issues[GitHub issue tracker].
+https://github.com/mercedes-benz/sechub-plugin-intellij/issues[GitHub issue tracker].
 
 === Import an existing SecHub report
 
