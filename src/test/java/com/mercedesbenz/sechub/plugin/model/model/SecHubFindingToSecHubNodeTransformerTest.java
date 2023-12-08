@@ -42,7 +42,7 @@ public class SecHubFindingToSecHubNodeTransformerTest {
 		FindingNode child1 = children.get(0);
 		assertEquals(Integer.valueOf(11), child1.getColumn());
 		assertEquals(1, child1.getCallStackStep());
-		assertTrue(child1.getDescription().contentEquals("myname"));
+		assertTrue(child1.getName().contentEquals("myname"));
 
 		// sub child
 		FindingNode child21 = child1.getChildren().get(0);
