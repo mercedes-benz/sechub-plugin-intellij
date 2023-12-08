@@ -178,7 +178,8 @@ public class SecHubToolWindowUISupport {
 			errorLog.error("No model available");
 			return;
 		}
-		int row = reportTable.getSelectedRow();
+		int rowViewIndex = reportTable.getSelectedRow();
+		int row = reportTable.convertRowIndexToModel(rowViewIndex);
 		Object obj = reportTable.getModel().getValueAt(row, 0);
 		if (obj == null) {
 			errorLog.error("entry row in table is null!");
