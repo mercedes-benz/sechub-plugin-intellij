@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: MIT
 package com.mercedesbenz.sechub.model;
 
-import static com.mercedesbenz.sechub.model.TestResourceHelper.getEnsuredTestPath;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.file.Path;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import static com.mercedesbenz.sechub.model.TestResourceHelper.getEnsuredTestPath;
+import static org.junit.Assert.*;
 
 public class FileLocationExplorerTest {
 

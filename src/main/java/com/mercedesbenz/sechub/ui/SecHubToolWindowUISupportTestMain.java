@@ -7,7 +7,7 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 
-import com.daimler.sechub.commons.model.Severity;
+import com.mercedesbenz.sechub.commons.model.Severity;
 import com.mercedesbenz.sechub.model.FindingModel;
 import com.mercedesbenz.sechub.model.FindingNode;
 import com.mercedesbenz.sechub.util.ErrorLog;

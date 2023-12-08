@@ -1,28 +1,33 @@
 // SPDX-License-Identifier: MIT
 package com.mercedesbenz.sechub;
 
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressIndicatorProvider;
+import com.mercedesbenz.sechub.api.SecHubReport;
+import com.mercedesbenz.sechub.api.SecHubReportException;
+import com.mercedesbenz.sechub.commons.model.SecHubFinding;
+import com.mercedesbenz.sechub.model.FindingModel;
+import com.mercedesbenz.sechub.model.SecHubFindingToFindingModelTransformer;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import com.daimler.sechub.client.java.SecHubClient;
-import com.daimler.sechub.client.java.SecHubReport;
-import com.daimler.sechub.client.java.SecHubReportException;
-import com.daimler.sechub.commons.model.SecHubFinding;
-import com.mercedesbenz.sechub.model.FindingModel;
-import com.mercedesbenz.sechub.model.SecHubFindingToFindingModelTransformer;
-import com.intellij.openapi.progress.ProgressIndicator;
-import com.intellij.openapi.progress.ProgressIndicatorProvider;
-
 public class SecHubReportImporter {
-    private static SecHubReportImporter INSTANCE = new SecHubReportImporter();
+    private static final SecHubReportImporter INSTANCE = new SecHubReportImporter();
+
+    private SecHubFindingToFindingModelTransformer transformer;
+    private SecHubReportViewUpdater secHubReportViewUpdater;
+
 
     public static SecHubReportImporter getInstance() {
         return INSTANCE;
     }
 
-    private SecHubFindingToFindingModelTransformer transformer = new SecHubFindingToFindingModelTransformer();
-    private SecHubReportViewUpdater secHubReportViewUpdater = new SecHubReportViewUpdater();
+    public SecHubReportImporter(){
+        transformer = new SecHubFindingToFindingModelTransformer();
+        secHubReportViewUpdater = new SecHubReportViewUpdater();
+    }
 
     public void importAndDisplayReport(File reportFile) throws IOException {
         importAndDisplayReport(reportFile, ProgressIndicatorProvider.getGlobalProgressIndicator());
@@ -39,13 +44,14 @@ public class SecHubReportImporter {
             throw new IOException("No permissions to read the report:" + reportFile);
         }
         String absolutePath = reportFile.getAbsolutePath();
-        //progressIndicator.setText("Import SecHub report from " + absolutePath);
+        progressIndicator.setText("Import SecHub report from " + absolutePath);
 
         try {
-            SecHubReport report = SecHubClient.importSecHubJsonReport(reportFile);
+            SecHubReport report = SecHubReport.fromFile(reportFile);
             if (report == null) {
                 throw new IOException("Report file importer returned null");
             }
+
             List<SecHubFinding> secHubFindings = report.getResult().getFindings();
 
             FindingModel model = transformer.transform(secHubFindings);

@@ -8,9 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.daimler.sechub.commons.model.SecHubCodeCallStack;
-import com.daimler.sechub.commons.model.SecHubFinding;
-import com.daimler.sechub.commons.model.Severity;
+import com.mercedesbenz.sechub.commons.model.SecHubCodeCallStack;
+import com.mercedesbenz.sechub.commons.model.SecHubFinding;
+import com.mercedesbenz.sechub.commons.model.Severity;
 import com.mercedesbenz.sechub.model.FindingNode.FindingNodeBuilder;
 
 public class SecHubFindingToFindingModelTransformer {

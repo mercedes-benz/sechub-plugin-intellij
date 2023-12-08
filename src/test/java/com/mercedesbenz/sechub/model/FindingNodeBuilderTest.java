@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 package com.mercedesbenz.sechub.model;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class FindingNodeBuilderTest {
 
@@ -53,8 +54,8 @@ public class FindingNodeBuilderTest {
 		FindingNode node = FindingNode.builder().setLocation(null).build();
 		
 		/* test */
-		assertEquals(null,node.getFilePath());
-		assertEquals(null,node.getFileName());
+		assertNull(node.getFilePath());
+		assertNull(node.getFileName());
 	}
 
 }

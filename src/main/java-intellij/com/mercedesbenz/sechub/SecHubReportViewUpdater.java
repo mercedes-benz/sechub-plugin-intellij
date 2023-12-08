@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 package com.mercedesbenz.sechub;
 
-import com.daimler.sechub.commons.model.TrafficLight;
+import com.mercedesbenz.sechub.commons.model.TrafficLight;
 import com.mercedesbenz.sechub.model.FindingModel;
 import com.mercedesbenz.sechub.window.SecHubToolWindow;
 import com.intellij.openapi.diagnostic.Logger;
