@@ -1,15 +1,6 @@
 // SPDX-License-Identifier: MIT
 package com.mercedesbenz.sechub.plugin.idea.window;
 
-import com.mercedesbenz.sechub.commons.model.TrafficLight;
-import com.mercedesbenz.sechub.plugin.model.FileLocationExplorer;
-import com.mercedesbenz.sechub.plugin.model.FindingModel;
-import com.mercedesbenz.sechub.plugin.model.FindingNode;
-import com.mercedesbenz.sechub.plugin.ui.SecHubToolWindowUIContext;
-import com.mercedesbenz.sechub.plugin.ui.SecHubToolWindowUISupport;
-import com.mercedesbenz.sechub.plugin.ui.SecHubTreeNode;
-import com.mercedesbenz.sechub.plugin.idea.util.ErrorLogger;
-import com.mercedesbenz.sechub.plugin.util.SimpleStringUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
@@ -22,7 +13,16 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.ColoredTreeCellRenderer;
 import com.intellij.ui.SimpleTextAttributes;
+import com.mercedesbenz.sechub.commons.model.TrafficLight;
 import com.mercedesbenz.sechub.plugin.idea.compatiblity.VirtualFileCompatibilityLayer;
+import com.mercedesbenz.sechub.plugin.idea.util.ErrorLogger;
+import com.mercedesbenz.sechub.plugin.model.FileLocationExplorer;
+import com.mercedesbenz.sechub.plugin.model.FindingModel;
+import com.mercedesbenz.sechub.plugin.model.FindingNode;
+import com.mercedesbenz.sechub.plugin.ui.SecHubToolWindowUIContext;
+import com.mercedesbenz.sechub.plugin.ui.SecHubToolWindowUISupport;
+import com.mercedesbenz.sechub.plugin.ui.SecHubTreeNode;
+import com.mercedesbenz.sechub.plugin.util.SimpleStringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -174,12 +174,12 @@ public class SecHubToolWindow {
             return;
         }
         if (pathes.size() > 1) {
-            LOG.warn("Multiple pathes found useing only first one");
+            LOG.warn("Multiple paths found using only first one");
         }
         Path first = pathes.get(0);
         @Nullable VirtualFile firstAsVirtualFile = VirtualFileManager.getInstance().findFileByUrl(first.toUri().toString());
         if (firstAsVirtualFile == null) {
-            LOG.error("Found in normal filesystem but not in virutal one:" + first);
+            LOG.error("Found in normal filesystem but not in virtual one:" + first);
             return;
         }
         int line = callStep.getLine();
@@ -201,9 +201,14 @@ public class SecHubToolWindow {
     public void update(FindingModel model) {
         UUID jobUUID = model.getJobUUID();
         TrafficLight trafficLight = model.getTrafficLight();
+        if (trafficLight==null){
+            trafficLight= TrafficLight.OFF;
+        }
 
         scanResultForJobText.setText(jobUUID == null ? "" : jobUUID.toString());
-        trafficLightText.setText(trafficLight == null ? "" : trafficLight.toString());
+
+        trafficLightText.setText(trafficLight.toString());
+
         findingsText.setText("" + model.getFindings().size());
         this.model = model;
         support.setFindingModel(model);

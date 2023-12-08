@@ -9,10 +9,12 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -138,8 +140,17 @@ public class SecHubToolWindowUISupport {
 
 	private void initReportTable() {
 		findingModel = new FindingModel();
-		SecHubTableModel model = new SecHubTableModel("Id", "Severity", "Name", "Location");
-		reportTable.setModel(model);
+		SecHubTableModel tableModel = new SecHubTableModel("Id", "Severity", "Name", "Location");
+		reportTable.setModel(tableModel);
+		TableRowSorter<SecHubTableModel> rowSorter = new TableRowSorter<>(tableModel);
+		rowSorter.setComparator(0, new Comparator<Integer>() {
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				return o1-o2;
+			}
+		});
+		reportTable.setRowSorter(rowSorter);
+		rowSorter.toggleSortOrder(0); // initial sort on first column
 
 		reportTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		reportTable.addMouseListener(new MouseAdapter() {
@@ -152,6 +163,8 @@ public class SecHubToolWindowUISupport {
 
 		});
 		reportTable.setMinimumSize(new Dimension(400, 400));
+		reportTable.setPreferredSize(new Dimension(400, 800));
+
 		/* resize headers */
 		TableColumnModel columnModel = reportTable.getColumnModel();
 		columnModel.getColumn(0).setPreferredWidth(50);
@@ -249,7 +262,7 @@ public class SecHubToolWindowUISupport {
 
 		SecHubTableModel reportTableModel = (SecHubTableModel) reportTable.getModel();
 		reportTableModel.removeAllRows();
-		
+
 		/* fill with new rows */
 		List<FindingNode> findings = findingModel.getFindings();
 		for (FindingNode finding : findings) {
