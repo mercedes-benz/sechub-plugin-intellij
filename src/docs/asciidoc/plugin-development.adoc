@@ -1,3 +1,8 @@
+:imagesdir: ./images
+:toc:
+:toc-title: Table of contents
+:toclevels: 5
+
 = Plugin developer guide
 
 == Preconditions

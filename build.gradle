@@ -85,9 +85,23 @@ publishPlugin {
 asciidoctor {
     baseDirFollowsSourceDir()
     sources {
-        include 'user-guide.adoc'
+        include 'user-guide.adoc', 'plugin-development.adoc'
     }
     outputDir  file('build/docs/asciidoc')
+
+    attributes 'build-gradle': file('build.gradle'),
+            'source-highlighter': 'coderay',
+            'toc': 'left',
+            'toclevels': '5',
+            'icons': 'font',
+            'setanchors': 'true',
+            'idprefix': '',
+            'idseparator': '-',
+            'docinfo1': 'true',
+            'sectnums': 'true',
+            'sectnumlevels': '5',
+            'version': rootProject.version
+
 }
 
 /*
