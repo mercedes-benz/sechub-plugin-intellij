@@ -44,7 +44,9 @@ public class SecHubReportImporter {
             throw new IOException("No permissions to read the report:" + reportFile);
         }
         String absolutePath = reportFile.getAbsolutePath();
-        progressIndicator.setText("Import SecHub report from " + absolutePath);
+        if (progressIndicator!=null){
+            progressIndicator.setText("Import SecHub report from " + absolutePath);
+        }
 
         try {
             SecHubReport report = SecHubReport.fromFile(reportFile);

@@ -69,7 +69,7 @@ public class SecHubToolWindowUISupportTestMain {
 			frame.setVisible(true);
 			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-			supportToTest.setModel(model);
+			supportToTest.setFindingModel(model);
 			supportToTest.addCallStepChangeListener((callstep) -> {
 				callStepLabel.setText(callstep.getRelevantPart());
 			});
@@ -126,7 +126,7 @@ public class SecHubToolWindowUISupportTestMain {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				InternalUITest uiTest = InternalUITest.this;
-				uiTest.supportToTest.setModel(uiTest.createTestModel());
+				uiTest.supportToTest.setFindingModel(uiTest.createTestModel());
 			}
 
 		}

@@ -206,6 +206,6 @@ public class SecHubToolWindow {
         trafficLightText.setText(trafficLight == null ? "" : trafficLight.toString());
         findingsText.setText("" + model.getFindings().size());
         this.model = model;
-        support.setModel(model);
+        support.setFindingModel(model);
     }
 }

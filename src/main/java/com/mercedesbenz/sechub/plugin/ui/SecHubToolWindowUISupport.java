@@ -32,7 +32,7 @@ public class SecHubToolWindowUISupport {
 	private final JLabel cweIdLabel;
 	private final SecHubToolWindowUIContext context;
 
-	private FindingModel model;
+	private FindingModel findingModel;
 	private Set<CallStepChangeListener> callStepChangeListeners;
 	private Set<ReportFindingSelectionChangeListener> reportFindingSelectionChangeListeners;
 
@@ -137,7 +137,7 @@ public class SecHubToolWindowUISupport {
 	}
 
 	private void initReportTable() {
-		model = new FindingModel();
+		findingModel = new FindingModel();
 		SecHubTableModel model = new SecHubTableModel("Id", "Severity", "Name", "Location");
 		reportTable.setModel(model);
 
@@ -161,7 +161,7 @@ public class SecHubToolWindowUISupport {
 	}
 
 	private void handleDoubleClickOnFinding() {
-		if (this.model == null) {
+		if (this.findingModel == null) {
 			errorLog.error("No model available");
 			return;
 		}
@@ -174,7 +174,7 @@ public class SecHubToolWindowUISupport {
 		Integer integer = Integer.valueOf(obj.toString());
 		int id = integer.intValue();
 
-		for (FindingNode finding : model.getFindings()) {
+		for (FindingNode finding : findingModel.getFindings()) {
 			if (finding.getId() == id) {
 				showFinding(finding);
 				break;
@@ -244,19 +244,19 @@ public class SecHubToolWindowUISupport {
 	
 	
 
-	public void setModel(FindingModel model) {
-		this.model = model;
+	public void setFindingModel(FindingModel findingModel) {
+		this.findingModel = findingModel;
 
 		SecHubTableModel reportTableModel = (SecHubTableModel) reportTable.getModel();
 		reportTableModel.removeAllRows();
 		
 		/* fill with new rows */
-		List<FindingNode> findings = model.getFindings();
+		List<FindingNode> findings = findingModel.getFindings();
 		for (FindingNode finding : findings) {
 			if (finding == null) {
 				continue;
 			}
-			Object[] rowData = new Object[] { finding.getId(), finding.getSeverity(), finding.getDescription(),
+			Object[] rowData = new Object[] { finding.getId(), finding.getSeverity(), finding.getName(),
 					finding.getFileName() };
 			reportTableModel.addRow(rowData);
 		}

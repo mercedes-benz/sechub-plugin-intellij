@@ -18,6 +18,8 @@ public class FindingNode implements Comparable<FindingNode> {
 	private List<FindingNode> children = new LinkedList<FindingNode>();
 
 	private Integer cweId;
+	private String name;
+
 	private String description;
 	private String location;
 	private Integer line;
@@ -31,18 +33,11 @@ public class FindingNode implements Comparable<FindingNode> {
 	public String filePath;
 	private Map<String,Object> metaDataCache;
 
-	private FindingNode(String description, String location, Integer line, Integer column, String relevantPart,
-						String source, Severity severity) {
-		this.description = description;
-		this.location = location;
-		this.line = line;
-		this.column = column;
-		this.relevantPart = relevantPart;
-		this.source = source;
-		this.severity = severity;
+	private FindingNode() {
 	}
 
 	public static class FindingNodeBuilder {
+		private String name;
 		private String description;
 		private String location;
 		private int line;
@@ -56,6 +51,11 @@ public class FindingNode implements Comparable<FindingNode> {
 
 		private FindingNodeBuilder() {
 
+		}
+
+		public FindingNodeBuilder setName(String name) {
+			this.name=name;
+			return this;
 		}
 
 		public FindingNodeBuilder setDescription(String description) {
@@ -109,7 +109,15 @@ public class FindingNode implements Comparable<FindingNode> {
 		}
 
 		public FindingNode build() {
-			FindingNode node = new FindingNode(description, location, line, column, relevantPart, source, severity);
+			FindingNode node = new FindingNode();
+			node.description=description;
+			node.location=location;
+			node.name=name;
+			node.line=line;
+			node.column=column;
+			node.relevantPart=relevantPart;
+			node.source=source;
+			node.severity=severity;
 			node.callStackStep = callStackStep;
 			node.id = id;
 			node.cweId=cweId;
@@ -236,6 +244,10 @@ public class FindingNode implements Comparable<FindingNode> {
 			}
 			return metaDataCache.get(key);
 		}
+	}
+
+	public String getName() {
+		return name;
 	}
 
 	private Object monitor= new Object();
