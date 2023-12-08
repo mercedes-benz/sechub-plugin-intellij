@@ -1,0 +1,45 @@
+= Plugin developer guide
+
+== Preconditions
+
+=== Setup
+- Download IntelliJ 2023.3 community edition
+- Installed Java >= 17 - e.g Eclipse Temurin (https://adoptium.net/temurin)
+- Additionally install `Plugin DevKit` when you want to use DevKit parts (for theming)
+
+image::install-plugin-devkit.png[]
+[quote, 'As mentioned in https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html[IDE develoment article]']
+____
+When using IntelliJ IDEA 2023.3 or later, the Plugin DevKit plugin must be installed from JetBrains Marketplace
+(Plugin Homepage) as it is no longer bundled with the IDE.
+____
+
+=== Additional information
+- You should read https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html
+
+=== Import SecHub IntelliJ plugin
+- clone the git repository git@github.com:mercedes-benz/sechub-plugin-intellij.git
+- open the repository as a project in IntelliJ
+
+== Start the plugin in sandbox mode
+
+=== Gradle variant
+Open the gradle toolwindow and execute "Tasks->intellij->runIde"
+
+Or execute `./gradlew runIde` from terminal.
+
+== Development HowTos
+=== IntelliJ Sources not available, only depcompiled
+Open the IntelliJ class - now it is opened by the internal
+decompiler. On the right top there is a button "Choose source".
+Click on this. Now select the correct IntelliJ folder and search
+for the correct subfolder (with a hash inside) - now select the source zip file for the installed/used version.
+
+After this: **close** existing editor and open the class again.
+Now you should the sources.
+
+TIP: This comes very handy when you want to look for deprecated classes, e.g. inside `IconLoader`.
+
+
+== Deployment
+Please read https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html for details.
