@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.mercedesbenz.sechub.commons.model.ScanType;
 import com.mercedesbenz.sechub.commons.model.Severity;
 
 /**
@@ -33,6 +34,8 @@ public class FindingNode implements Comparable<FindingNode> {
 	public String filePath;
 	private Map<String,Object> metaDataCache;
 
+	private ScanType scanType;
+
 	private FindingNode() {
 	}
 
@@ -49,10 +52,16 @@ public class FindingNode implements Comparable<FindingNode> {
 		private Severity severity;
 		private Integer cweId;
 
+		private ScanType scanType;
+
 		private FindingNodeBuilder() {
 
 		}
 
+		public FindingNodeBuilder setScanType(ScanType scanType){
+			this.scanType=scanType;
+			return this;
+		}
 		public FindingNodeBuilder setName(String name) {
 			this.name=name;
 			return this;
@@ -121,6 +130,7 @@ public class FindingNode implements Comparable<FindingNode> {
 			node.callStackStep = callStackStep;
 			node.id = id;
 			node.cweId=cweId;
+			node.scanType=scanType;
 
 			calculateFileNameAndPath(node);
 
@@ -248,6 +258,10 @@ public class FindingNode implements Comparable<FindingNode> {
 
 	public String getName() {
 		return name;
+	}
+
+	public ScanType getScanType() {
+		return scanType;
 	}
 
 	private Object monitor= new Object();

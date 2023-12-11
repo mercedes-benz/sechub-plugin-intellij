@@ -2,8 +2,8 @@
 package com.mercedesbenz.sechub.plugin.idea;
 
 import com.mercedesbenz.sechub.commons.model.TrafficLight;
+import com.mercedesbenz.sechub.plugin.idea.window.SecHubReportPanel;
 import com.mercedesbenz.sechub.plugin.model.FindingModel;
-import com.mercedesbenz.sechub.plugin.idea.window.SecHubToolWindow;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProgressIndicatorProvider;
 import com.intellij.openapi.progress.ProgressManager;
@@ -40,12 +40,20 @@ public class SecHubReportViewUpdater {
         }
         toolWindow.show(() -> {
                     // at this point the factory must have created and registered the SecHubToolWindow instance
-                    SecHubToolWindow sechubToolWindow = SecHubToolWindow.getInstance();
+                   /* SecHubToolWindow sechubToolWindow = SecHubToolWindow.getInstance();
                     if (sechubToolWindow == null) {
                         LOG.error("Did not found SecHub tool window!");
                         return;
                     }
                     sechubToolWindow.update(model);
+                    */
+
+            SecHubReportPanel reportPanel = SecHubReportPanel.getInstance();
+            if (reportPanel == null) {
+                LOG.error("Did not found SecHub tool window!");
+                return;
+            }
+            reportPanel.update(model);
                 }
         );
 

@@ -28,7 +28,7 @@ public class SecHubToolWindowUISupportTestMain {
 		private SecHubToolWindowUISupport supportToTest;
 
 		private void start() {
-			JFrame frame = new JFrame("test");
+			JFrame frame = new JFrame("Test application");
 			JMenu menu = new JMenu("Action");
 			menu.add(new SetNewModelAction());
 			JMenuBar menuBar = new JMenuBar();
@@ -70,8 +70,8 @@ public class SecHubToolWindowUISupportTestMain {
 			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
 			supportToTest.setFindingModel(model);
-			supportToTest.addCallStepChangeListener((callstep) -> {
-				callStepLabel.setText(callstep.getRelevantPart());
+			supportToTest.addCallStepChangeListener((callStep, showEditor) -> {
+				callStepLabel.setText(callStep.getRelevantPart()+" showEditor="+showEditor);
 			});
 
 			supportToTest.addReportFindingSelectionChangeListener((finding) -> {

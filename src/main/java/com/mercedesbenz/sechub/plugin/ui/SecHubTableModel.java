@@ -15,7 +15,7 @@ public class SecHubTableModel extends DefaultTableModel {
 	public boolean isCellEditable(int row, int column) {
 		return globalCellEditable;
 	}
-	
+
 	public void removeAllRows() {
 		for (int i = 0; i < getRowCount(); i++) {
 			removeRow(i);

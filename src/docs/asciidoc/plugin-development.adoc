@@ -45,6 +45,28 @@ Now you should the sources.
 
 TIP: This comes very handy when you want to look for deprecated classes, e.g. inside `IconLoader`.
 
+=== Intellij SDK Howtos
+==== Tool windows
+https://plugins.jetbrains.com/docs/intellij/tool-windows.html
+
+Currently we do NOT implement https://github.com/JetBrains/intellij-community/blob/idea/233.11799.241/platform/core-api/src/com/intellij/openapi/project/DumbAware.java[DumbAware] in SecHub Toolwindow,
+because we want to ensure that we can open
+
+### UI guide lines
+- https://jetbrains.design/intellij/components/tool_window/
+- https://jetbrains.design/intellij/controls/balloon/
+
+==== Content tabs
+https://plugins.jetbrains.com/docs/intellij/tool-windows.html#contents-tabs
+
+==== Icons
+https://plugins.jetbrains.com/docs/intellij/icons.html
+
+==== IntelliJ swing components
+https://plugins.jetbrains.com/docs/intellij/misc-swing-components.html
+
+==== Actions
+https://plugins.jetbrains.com/docs/intellij/basic-action-system.html#building-ui-from-actions
 
 == Deployment
 Please read https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html for details.

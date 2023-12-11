@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 package com.mercedesbenz.sechub.plugin.model;
 
+import com.mercedesbenz.sechub.commons.model.ScanType;
 import com.mercedesbenz.sechub.commons.model.TrafficLight;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ public class FindingModel {
 	private List<FindingNode> findings = new ArrayList<>();
 	private UUID jobUUID;
 	private TrafficLight trafficLight;
-	
+
 	public UUID getJobUUID() {
 		return jobUUID;
 	}
@@ -20,7 +21,7 @@ public class FindingModel {
 	public void setTrafficLight(TrafficLight trafficLight) {
 		this.trafficLight = trafficLight;
 	}
-	
+
 	public TrafficLight getTrafficLight() {
 		return trafficLight;
 	}

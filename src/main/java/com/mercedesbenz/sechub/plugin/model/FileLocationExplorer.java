@@ -91,7 +91,6 @@ public class FileLocationExplorer {
 		try (Stream<Path> files = Files.walk(searchDirectory)) {
 			return files.filter(matcher::matches).collect(Collectors.toList());
 		}
-
 	}
 
 }

@@ -50,6 +50,7 @@ public class SecHubFindingToFindingModelTransformer {
 		FindingNode.FindingNodeBuilder builder = FindingNode.builder().
 				setId(id).
 				setName(finding.getName()).
+				setScanType(finding.getType()).
 				setCweId(cweId).
 				setCallStackStep(callStackStep++).
 				setColumn(code.getColumn()).
