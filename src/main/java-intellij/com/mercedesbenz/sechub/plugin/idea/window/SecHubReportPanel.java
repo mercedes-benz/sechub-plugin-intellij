@@ -14,12 +14,18 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowBalloonShowOptions;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.WindowManager;
-import com.intellij.ui.*;
+import com.intellij.ui.ColoredTreeCellRenderer;
+import com.intellij.ui.JBSplitter;
+import com.intellij.ui.OnePixelSplitter;
+import com.intellij.ui.SimpleTextAttributes;
 import com.intellij.ui.components.*;
+import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.ui.components.panels.VerticalLayout;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
 import com.mercedesbenz.sechub.commons.model.TrafficLight;
+import com.mercedesbenz.sechub.plugin.idea.IntellijComponentBuilder;
+import com.mercedesbenz.sechub.plugin.idea.IntellijRenderDataProvider;
 import com.mercedesbenz.sechub.plugin.idea.compatiblity.VirtualFileCompatibilityLayer;
 import com.mercedesbenz.sechub.plugin.idea.util.ErrorLogger;
 import com.mercedesbenz.sechub.plugin.model.FileLocationExplorer;
@@ -28,14 +34,14 @@ import com.mercedesbenz.sechub.plugin.model.FindingNode;
 import com.mercedesbenz.sechub.plugin.ui.SecHubToolWindowUIContext;
 import com.mercedesbenz.sechub.plugin.ui.SecHubToolWindowUISupport;
 import com.mercedesbenz.sechub.plugin.ui.SecHubTreeNode;
-import com.mercedesbenz.sechub.plugin.util.JTreeUtil;
 import com.mercedesbenz.sechub.plugin.util.SimpleStringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.text.Caret;
+import javax.swing.text.DefaultCaret;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -51,167 +57,298 @@ public class SecHubReportPanel {
 
     private SecHubToolWindowUISupport support;
     private Icon callHierarchyElementIcon;
-    private JPanel sechubToolWindowContent;
-    private JPanel verticalSecHubReportPanel;
-    private JPanel sechubCallHierarchy;
-    private JPanel secHubReportHeaderPanel;
-    private JPanel secHubReportContentPanel;
-    private JTable reportTable;
-    private JTable callStepDetailTable;
-    private JPanel detailPanel;
-    private JTextField trafficLightText;
-    private JTextField scanResultForJobText;
-    private JTextField findingsText;
-    private JTree callHierarchyTree;
-    private JPanel callStepDetailPanel;
-    private JTextArea reportSourceCodeTextArea;
-    private JBTextArea findingHeaderLabel;
-    private JSplitPane mainSplitPane;
-    private JLabel reportSourceCodeLabel;
-    private JSplitPane callHierarchySplitPane;
-    private JLabel cweIdLabel;
-    private FindingModel model;
 
     private ToolWindow toolWindow;
+    private JLabel trafficLightIconLabel;
+    private JLabel amountOfFindingsLabel;
+    private JBTextField scanResultForJobText;
+    private JBTable callStepDetailTable;
+    private Tree callHierarchyTree;
+    private JBTable reportTable;
+    private JBLabel cweIdLabel;
+    private JBTextArea reportSourceCodeTextArea;
+    private JBTextArea findingDescriptionTextArea;
+
+    private JPanel contentPanel;
+    private JBLabel findingLabel;
+    private JTextArea findingSolutionTextArea;
+    private JBTabbedPane southTabPane;
+    private JPanel webRequestPanel;
+    private JPanel webResponsePanel;
+    private JTabbedPane descriptionAndSolutionTabbedPane;
+    private JTextArea webRequestTextArea;
+    private JTextArea webResponseTextArea;
+    private JTextArea attackTextArea;
+    private JPanel callHierarchyPanel;
+    private JPanel attackPanel;
 
 
     public SecHubReportPanel(ToolWindow toolWindow) {
-        this.toolWindow=toolWindow;
-        createComponentsAndSupport();
+        this.toolWindow = toolWindow;
+
+        createComponents();
+        createAndInstallSupport();
+
         installDragAndDrop();
+
         customizeCallHierarchyTree();
+        customizeCallStepDetailsTable();
+
         reset();
     }
 
     @NotNull
-    private void createComponentsAndSupport() {
-        sechubToolWindowContent = new JBPanel();
-        sechubToolWindowContent.setLayout(new BorderLayout());
+    private void createComponents() {
 
-        verticalSecHubReportPanel = new JBPanel();
-        verticalSecHubReportPanel.setLayout(new VerticalLayout(SECHUB_REPORT_DEFAULT_GAP));
+        JPanel contentNorth = createReportTablePanel();
+        JPanel contentSouth = createFindingPanel();
 
-        sechubCallHierarchy = new JBPanel();
-        sechubCallHierarchy.setLayout(new VerticalLayout(SECHUB_REPORT_DEFAULT_GAP));
-        secHubReportHeaderPanel = new JBPanel();
-        secHubReportHeaderPanel.setLayout(new VerticalLayout(SECHUB_REPORT_DEFAULT_GAP));
+        JBSplitter reportAndDetailsSplitterPanel = new OnePixelSplitter(true);
+        reportAndDetailsSplitterPanel.setShowDividerControls(true);
+        reportAndDetailsSplitterPanel.setShowDividerIcon(true);
+        reportAndDetailsSplitterPanel.setFirstComponent(new JBScrollPane(contentNorth));
+        reportAndDetailsSplitterPanel.setSecondComponent(contentSouth);
+        reportAndDetailsSplitterPanel.setDividerPositionStrategy(Splitter.DividerPositionStrategy.DISTRIBUTE);
 
+        callHierarchyElementIcon = AllIcons.General.ChevronDown;
 
-        secHubReportContentPanel = new JBPanel();
-        secHubReportContentPanel.setLayout(new BorderLayout());
+        contentPanel = new JBPanel();
+        contentPanel.setLayout(new BorderLayout());
+        contentPanel.add(reportAndDetailsSplitterPanel, BorderLayout.CENTER);
 
-        reportTable = new JBTable();
-        callStepDetailTable = new JBTable();
-        detailPanel = new JPanel();
-        detailPanel.setLayout(new VerticalLayout(SECHUB_REPORT_DEFAULT_GAP));
-        trafficLightText = new JBTextField();
-        trafficLightText.setEditable(false);
+    }
 
-        scanResultForJobText = new JBTextField();
-        scanResultForJobText.setEditable(false);
+    private JPanel createReportTablePanel() {
 
-        findingsText = new JBTextField();
-        findingsText.setEditable(false);
-
-        callHierarchyTree = new Tree();
-        callStepDetailPanel = new JBPanel();
-        callStepDetailPanel.setLayout(new VerticalLayout(SECHUB_REPORT_DEFAULT_GAP));
-
-        reportSourceCodeTextArea = new JBTextArea();
-        findingHeaderLabel = new JBTextArea();
-        findingHeaderLabel.setAutoscrolls(true);
-        findingHeaderLabel.setEditable(false);
-
-        reportSourceCodeLabel = new JBLabel();
-        cweIdLabel = new JBLabel();
-
-        verticalSecHubReportPanel.add(secHubReportHeaderPanel);
-        verticalSecHubReportPanel.add(secHubReportContentPanel, VerticalLayout.FILL);
-
-        secHubReportHeaderPanel.add(scanResultForJobText);
-        secHubReportHeaderPanel.add(trafficLightText);
-        secHubReportHeaderPanel.add(scanResultForJobText);
-
+        JBTable reportTable = new JBTable();
         JBScrollPane reportTableScrollPane = new JBScrollPane(reportTable);
-        reportTableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        reportTableScrollPane.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM + SideBorder.LEFT + SideBorder.TOP));
 
+        JLabel trafficLightIconLabel = new JLabel();
+        JLabel amountOfFindingsLabel = new JLabel();
+
+
+        JPanel secHubReportTablePanel = new JBPanel();
+        secHubReportTablePanel.setLayout(new BorderLayout());
+
+        JBTextField scanResultForJobText = new JBTextField();
+        scanResultForJobText.setEditable(false);
+        scanResultForJobText.setBorder(null); // avoid jumping field in UI - looks now like a label, but people can select and copy the job uuid if wanted...
+
+        JPanel secHubReportHeaderPanel = new JBPanel();
+        secHubReportHeaderPanel.setLayout(new HorizontalLayout(SECHUB_REPORT_DEFAULT_GAP));
+        secHubReportHeaderPanel.add(trafficLightIconLabel);
+        secHubReportHeaderPanel.add(amountOfFindingsLabel);
+        secHubReportHeaderPanel.add(scanResultForJobText);
+
+
+        JPanel secHubReportContentPanel = new JBPanel();
+        secHubReportContentPanel.setLayout(new BorderLayout());
+        secHubReportTablePanel.add(secHubReportHeaderPanel, BorderLayout.NORTH);
+        secHubReportTablePanel.add(secHubReportContentPanel, BorderLayout.CENTER);
         secHubReportContentPanel.add(reportTableScrollPane, BorderLayout.CENTER);
 
-        sechubCallHierarchy.add(detailPanel);
-        findingHeaderLabel.setLineWrap(true);
-        findingHeaderLabel.setWrapStyleWord(true);
-        JBScrollPane findingHeaderScrollpane = new JBScrollPane(findingHeaderLabel);
-        findingHeaderScrollpane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        findingHeaderScrollpane.setBorder(IdeBorderFactory.createBorder(SideBorder.BOTTOM + SideBorder.LEFT + SideBorder.TOP));
-        detailPanel.add(findingHeaderScrollpane);
-        detailPanel.add(cweIdLabel);
+        /* now setup fields */
+        this.scanResultForJobText = scanResultForJobText;
+        this.trafficLightIconLabel = trafficLightIconLabel;
+        this.amountOfFindingsLabel = amountOfFindingsLabel;
 
-        JBScrollPane callHierarchyTreeScrollPane = new JBScrollPane(callHierarchyTree);
-        callHierarchyTreeScrollPane.setMinimumSize(new Dimension(400,-1));
-        callHierarchyTreeScrollPane.setMinimumSize(new Dimension(600,-1));
+        this.reportTable = reportTable;
 
-        JBSplitter hierarchyAndDetailSplitter = new OnePixelSplitter(false);
-        hierarchyAndDetailSplitter.setFirstComponent(callHierarchyTreeScrollPane);
-        hierarchyAndDetailSplitter.setSecondComponent(callStepDetailPanel);
-        hierarchyAndDetailSplitter.setShowDividerControls(true);
-        hierarchyAndDetailSplitter.setShowDividerIcon(true);
-        hierarchyAndDetailSplitter.setDividerPositionStrategy(Splitter.DividerPositionStrategy.DISTRIBUTE);
-        sechubCallHierarchy.add(hierarchyAndDetailSplitter);
+        return secHubReportTablePanel;
+    }
 
-        JBSplitter reportAndDetailsSplitter = new OnePixelSplitter(true);
-        reportAndDetailsSplitter.setShowDividerControls(true);
-        reportAndDetailsSplitter.setShowDividerIcon(true);
-        reportAndDetailsSplitter.setFirstComponent(verticalSecHubReportPanel);
-        reportAndDetailsSplitter.setSecondComponent(sechubCallHierarchy);
-        reportAndDetailsSplitter.setDividerPositionStrategy(Splitter.DividerPositionStrategy.DISTRIBUTE);
+    private JPanel createFindingPanel() {
 
-        sechubToolWindowContent.add(reportAndDetailsSplitter, BorderLayout.CENTER);
+        JComponent findingNorthPanel = createFindingNorthComponent();
+        JComponent findingSouthPanel = createFindingSouthComponent();
+
+        JBSplitter findingAndFindingStepsSplitter = new OnePixelSplitter(true);
+        findingAndFindingStepsSplitter.setFirstComponent(findingNorthPanel);
+        findingAndFindingStepsSplitter.setSecondComponent(findingSouthPanel);
+        findingAndFindingStepsSplitter.setShowDividerControls(true);
+        findingAndFindingStepsSplitter.setShowDividerIcon(true);
+        findingAndFindingStepsSplitter.setProportion(0.1f);
+
+        return findingAndFindingStepsSplitter;
+
+    }
+
+    private JComponent createFindingNorthComponent() {
+        JBLabel cweIdLabel = new JBLabel();
+
+        JBLabel findingLabel = new JBLabel();
+
+
+        JPanel cweAndFindingPanel = new JBPanel<>();
+        cweAndFindingPanel.setLayout(new HorizontalLayout(SECHUB_REPORT_DEFAULT_GAP));
+        cweAndFindingPanel.add(findingLabel);
+        cweAndFindingPanel.add(cweIdLabel);
+
+        JBTextArea findingDescriptionTextArea = prepareNonEditLargeTextArea(new JBTextArea());
+        JBTextArea findingSolutionTextArea = prepareNonEditLargeTextArea(new JBTextArea());
+
+        descriptionAndSolutionTabbedPane = new JBTabbedPane();
+        descriptionAndSolutionTabbedPane.add("Description", new JBScrollPane(findingDescriptionTextArea));
+        descriptionAndSolutionTabbedPane.add("Solution", new JBScrollPane(findingSolutionTextArea));
+
+        JPanel northPanel = new JBPanel();
+        northPanel.setLayout(new VerticalLayout(SECHUB_REPORT_DEFAULT_GAP));
+        northPanel.add(cweAndFindingPanel);
+        northPanel.add(descriptionAndSolutionTabbedPane);
+
+        /* setup now as fields */
+        this.findingLabel = findingLabel;
+        this.cweIdLabel = cweIdLabel;
+        this.findingDescriptionTextArea = findingDescriptionTextArea;
+        this.findingSolutionTextArea = findingSolutionTextArea;
+
+        return northPanel;
+    }
+
+    private JBTextArea prepareNonEditLargeTextArea(JBTextArea textArea){
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+
+        Caret caret = textArea.getCaret();
+        if (caret instanceof DefaultCaret){
+            DefaultCaret defaultCaret = (DefaultCaret) caret;
+            defaultCaret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+        }
+
+        return textArea;
+    }
+
+    private JComponent createFindingSouthComponent() {
+        southTabPane = new JBTabbedPane();
+
+        createCallHierachyComponents();
+
+        createWebRequestComponents();
+        createWebResponseComponents();
+        createAttackComponents();
+
+        return southTabPane;
+    }
+
+    private void createWebResponseComponents() {
+        webResponseTextArea = prepareNonEditLargeTextArea(new JBTextArea());
+        webResponsePanel = new JBPanel<>();
+        webResponsePanel.setLayout(new BorderLayout());
+        webResponsePanel.add(webResponseTextArea, BorderLayout.CENTER);
+    }
+
+    private void createWebRequestComponents() {
+        webRequestTextArea = prepareNonEditLargeTextArea(new JBTextArea());
+        webRequestPanel = new JBPanel<>();
+        webRequestPanel.setLayout(new BorderLayout());
+        webRequestPanel.add(new JBScrollPane(webRequestTextArea), BorderLayout.CENTER);
+    }
+    private void createAttackComponents() {
+        attackTextArea = prepareNonEditLargeTextArea(new JBTextArea());
+        attackPanel = new JBPanel<>();
+        attackPanel.setLayout(new BorderLayout());
+        attackPanel.add(new JBScrollPane(attackTextArea), BorderLayout.CENTER);
+    }
+
+    private void createCallHierachyComponents() {
+        Tree callHierarchyTree = new Tree();
+
+        JBTextArea reportSourceCodeTextArea = prepareNonEditLargeTextArea(new JBTextArea());
+
+        JBLabel reportSourceCodeLabel = new JBLabel("Source:");
 
         JBPanel reportSourceCodePanel = new JBPanel();
         reportSourceCodePanel.setLayout(new VerticalLayout(SECHUB_REPORT_DEFAULT_GAP));
         reportSourceCodePanel.add(reportSourceCodeLabel);
-        reportSourceCodePanel.add(new JBScrollPane(reportSourceCodeTextArea));
+        reportSourceCodePanel.add(reportSourceCodeTextArea);
 
 
+        JBTable callStepDetailTable = new JBTable();
+        JBPanel callStepDetailPanel = new JBPanel();
+        callStepDetailPanel.setLayout(new VerticalLayout(SECHUB_REPORT_DEFAULT_GAP));
+        callStepDetailPanel.add(new JBScrollPane(callStepDetailTable));
+        callStepDetailPanel.add(reportSourceCodePanel);
+
+        OnePixelSplitter callHierarchySplitterPanel = new OnePixelSplitter(false);
+        callHierarchySplitterPanel.setFirstComponent(new JBScrollPane(callHierarchyTree));
+        callHierarchySplitterPanel.setSecondComponent(new JBScrollPane(callStepDetailPanel));
+        callHierarchySplitterPanel.setShowDividerControls(true);
+        callHierarchySplitterPanel.setShowDividerIcon(true);
+        callHierarchySplitterPanel.setDividerPositionStrategy(Splitter.DividerPositionStrategy.DISTRIBUTE);
+
+        /* now set as fields */
+        this.callStepDetailTable = callStepDetailTable;
+        this.callHierarchyTree = callHierarchyTree;
+        this.callHierarchyPanel=callHierarchySplitterPanel;
+        this.reportSourceCodeTextArea = reportSourceCodeTextArea;
+    }
+
+    private void customizeCallStepDetailsTable() {
         callStepDetailTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount()>1){
+                if (e.getClickCount() > 1) {
                     Object component = callHierarchyTree.getLastSelectedPathComponent();
-                    if (component instanceof DefaultMutableTreeNode){
+                    if (component instanceof DefaultMutableTreeNode) {
                         DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) component;
                         Object userObject = treeNode.getUserObject();
-                        if (userObject instanceof FindingNode){
+                        if (userObject instanceof FindingNode) {
                             showInEditor((FindingNode) userObject);
                         }
                     }
                 }
             }
         });
+    }
 
-        callStepDetailPanel.add(new JBScrollPane(callStepDetailTable));
-        callStepDetailPanel.add(new JBScrollPane(reportSourceCodePanel));
-
-        callHierarchyElementIcon = AllIcons.General.ChevronDown;
+    private void createAndInstallSupport() {
         SecHubToolWindowUIContext context = new SecHubToolWindowUIContext();
         context.findingTable = reportTable;
+
+        context.callHierarchyTabComponent = callHierarchyPanel;
         context.callHierarchyTree = callHierarchyTree;
         context.callHierarchyDetailTable = callStepDetailTable;
+
         context.errorLog = ErrorLogger.getInstance();
         context.cweIdLabel = cweIdLabel;
+        context.findingRenderDataProvider = new IntellijRenderDataProvider();
+        context.componentBuilder=new IntellijComponentBuilder();
+        context.findingTypeDetailsTabbedPane = southTabPane;
+
+        context.descriptionAndSolutionTabbedPane = descriptionAndSolutionTabbedPane;
+
+
+        context.webResponseTabComponent = webResponsePanel;
+        context.webResponseTextArea = webResponseTextArea;
+
+        context.webRequestTabComponent = webRequestPanel;
+        context.webRequestTextArea = webRequestTextArea;
+
+        context.attackTextArea = attackTextArea;
+        context.attackTabComponent = attackPanel;
 
         support = new SecHubToolWindowUISupport(context);
 
         support.addCallStepChangeListener((callStep, showEditor) -> {
-            reportSourceCodeTextArea.setText(callStep == null ? "" : SimpleStringUtil.toStringTrimmed(callStep.getSource()));
+            reportSourceCodeTextArea.setText(callStep == null ? "" : SimpleStringUtil.toStringTrimmed(callStep.getSource()) + "\n");
             /* now show in editor as well */
-            if (showEditor){
+            if (showEditor) {
                 showInEditor(callStep);
             }
         });
         support.addReportFindingSelectionChangeListener((finding) -> {
-            findingHeaderLabel.setText("Finding " + finding.getId() + ":\n"+(finding.getDescription()== null ? "No description available" : finding.getDescription()));
+            findingLabel.setText("Finding " + finding.getId() + ":");
+            findingDescriptionTextArea.setText(finding.getDescription() == null ? "No description available" : finding.getDescription());
+            if (finding.getSolution() == null) {
+                if (finding.getCweId() == null) {
+                    findingSolutionTextArea.setText("No solution available");
+                } else {
+                    findingSolutionTextArea.setText("Please follow the CWE link and read the solution text there.");
+                }
+            } else {
+                findingSolutionTextArea.setText(finding.getSolution());
+            }
         });
         support.initialize();
     }
@@ -221,7 +358,7 @@ public class SecHubReportPanel {
         reportTable.setTransferHandler(transferHandler);
         callHierarchyTree.setTransferHandler(transferHandler);
 
-        sechubToolWindowContent.setTransferHandler(transferHandler);
+        contentPanel.setTransferHandler(transferHandler);
         reportSourceCodeTextArea.setTransferHandler(transferHandler);
         callStepDetailTable.setTransferHandler(transferHandler);
     }
@@ -239,10 +376,12 @@ public class SecHubReportPanel {
                     return;
                 }
                 String relevantPart = findingNode.getRelevantPart();
-                append(relevantPart == null ? "unknown" : relevantPart, SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
-                append(" - ");
+                if (relevantPart != null) {
+                    append(relevantPart, SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES);
+                    append(" - ");
+                }
                 String fileName = findingNode.getFileName();
-                append(fileName == null ? "unknown" : fileName, SimpleTextAttributes.GRAY_ATTRIBUTES);
+                append(fileName == null ? "Unknown" : fileName, SimpleTextAttributes.GRAY_ATTRIBUTES);
 
                 setIcon(callHierarchyElementIcon);
 
@@ -261,6 +400,9 @@ public class SecHubReportPanel {
 
     private void showInEditor(FindingNode callStep) {
         if (callStep == null) {
+            return;
+        }
+        if (!callStep.canBeShownInCallHierarchy()) {
             return;
         }
         Project[] projects = ProjectManager.getInstance().getOpenProjects();
@@ -292,7 +434,7 @@ public class SecHubReportPanel {
         }
         if (pathes.isEmpty()) {
             ToolWindowBalloonShowOptions options = new ToolWindowBalloonShowOptions(toolWindow.getId(), MessageType.WARNING,
-                    "No source found for location: "+callStep.getLocation(),null,null, (builder) -> {
+                    "No source found for location: " + callStep.getLocation(), null, null, (builder) -> {
                 builder.setFadeoutTime(1500);
             });
 
@@ -317,15 +459,17 @@ public class SecHubReportPanel {
 
 
     public JPanel getContent() {
-        return sechubToolWindowContent;
+        return contentPanel;
     }
 
     public void update(FindingModel model) {
         // reset old field data
-        findingHeaderLabel.setText("");
+        findingLabel.setText("");
         cweIdLabel.setText("");
-        reportSourceCodeLabel.setText("");
+        findingDescriptionTextArea.setText("");
+        findingSolutionTextArea.setText("");
         reportSourceCodeTextArea.setText("");
+        descriptionAndSolutionTabbedPane.setVisible(false);
         support.showFindingNode(null, false);
 
         UUID jobUUID = model.getJobUUID();
@@ -334,22 +478,26 @@ public class SecHubReportPanel {
         if (trafficLight == null) {
             trafficLight = TrafficLight.OFF;
         }
-
-
-        scanResultForJobText.setText("SecHub Job UUID:"+ (jobUUID == null ? "" : jobUUID.toString()));
-
-        trafficLightText.setText(trafficLight==null ? "" : trafficLight.toString());
-
-        if (trafficLight!=null){
-            trafficLightText.setText(trafficLightText.getText()+", "+model.getFindings().size()+" findings");
+        if (jobUUID == null) {
+            amountOfFindingsLabel.setText("No SecHub report loaded");
+            scanResultForJobText.setText("");
+        } else {
+            amountOfFindingsLabel.setText(model.getFindings().size() + " findings in job:");
+            scanResultForJobText.setText(jobUUID.toString());
         }
-        this.model = model;
+
+        trafficLightIconLabel.setIcon(support.getRenderDataProvider().getIconForTrafficLight(trafficLight));
+        trafficLightIconLabel.setToolTipText("Traffic light is:" + trafficLight.toString());
+
         support.setFindingModel(model);
     }
 
     public void reset() {
         update(new FindingModel());
+
         support.resetTablePresentation();
-        support.resetDetailsTablePresentation();
+        support.resetCallHierarchyStepTable();
+        support.resetFindingNodeTabPane();
+        support.resetDescriptionAndSolutionTabPane(false);
     }
 }

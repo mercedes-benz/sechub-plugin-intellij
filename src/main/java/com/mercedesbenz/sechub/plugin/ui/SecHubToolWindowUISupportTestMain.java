@@ -4,10 +4,16 @@ package com.mercedesbenz.sechub.plugin.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.Objects;
 
 import javax.swing.*;
 
+import com.mercedesbenz.sechub.commons.model.ScanType;
+import com.mercedesbenz.sechub.commons.model.SecHubFinding;
 import com.mercedesbenz.sechub.commons.model.Severity;
+import com.mercedesbenz.sechub.commons.model.TrafficLight;
+import com.mercedesbenz.sechub.commons.model.web.SecHubReportWeb;
+import com.mercedesbenz.sechub.commons.model.web.SecHubReportWebEvidence;
 import com.mercedesbenz.sechub.plugin.model.FindingModel;
 import com.mercedesbenz.sechub.plugin.model.FindingNode;
 import com.mercedesbenz.sechub.plugin.util.ErrorLog;
@@ -18,117 +24,193 @@ import com.mercedesbenz.sechub.plugin.util.ErrorLog;
  */
 public class SecHubToolWindowUISupportTestMain {
 
-	public static void main(String[] args) {
-		new InternalUITest().start();
-	}
+    public static void main(String[] args) {
+        new InternalUITest().start();
+    }
 
-	private static class InternalUITest {
+    private static class InternalUITest {
 
-		private static int findingCounter = 1;
-		private SecHubToolWindowUISupport supportToTest;
+        private static int findingCounter = 1;
+        private SecHubToolWindowUISupport supportToTest;
 
-		private void start() {
-			JFrame frame = new JFrame("Test application");
-			JMenu menu = new JMenu("Action");
-			menu.add(new SetNewModelAction());
-			JMenuBar menuBar = new JMenuBar();
+        private void start() {
+            JFrame frame = new JFrame("Test application");
+            JMenu menu = new JMenu("Action");
+            menu.add(new SetNewModelAction());
+            JMenuBar menuBar = new JMenuBar();
 
-			menuBar.add(menu);
-			frame.setJMenuBar(menuBar);
+            ImageIcon codeScanIcon = new ImageIcon("icons/activity.png",
+                    "Just a green ball...");
 
-			JTree callHierarchyTree = new JTree();
-			FindingModel model = createTestModel();
+            menuBar.add(menu);
+            frame.setJMenuBar(menuBar);
 
-			JTable reportTable = new JTable();
-			JTable callStepDetailTable = new JTable();
-			JSplitPane pane1 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(callHierarchyTree),
-					new JScrollPane(callStepDetailTable));
-			JSplitPane pane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(reportTable), pane1);
-			frame.add(pane2);
+            JTree callHierarchyTree = new JTree();
+            FindingModel model = createTestModel();
 
-			JPanel southPanel = new JPanel();
-			JLabel reportFindingLabel = new JLabel("No finding selected");
-			JLabel callStepLabel = new JLabel("No call step selected");
-			southPanel.add(reportFindingLabel);
-			southPanel.add(new JLabel("---"));
-			southPanel.add(callStepLabel);
-			frame.add(southPanel, BorderLayout.SOUTH);
+            JTable reportTable = new JTable();
+            JTable callStepDetailTable = new JTable();
+            JSplitPane callHierarchySplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(callHierarchyTree),
+                    new JScrollPane(callStepDetailTable));
+            JTabbedPane tabbedPane = new JTabbedPane();
+            JPanel webRequestPanel = new JPanel();
+            JPanel webResponsePanel = new JPanel();
+            JPanel attackPanel = new JPanel();
 
-			callHierarchyTree.setPreferredSize(new Dimension(800, 600));
+            JSplitPane pane2 = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(reportTable), tabbedPane);
+            frame.add(pane2);
 
-			SecHubToolWindowUIContext context = new SecHubToolWindowUIContext();
-			context.findingTable=reportTable;
-			context.callHierarchyDetailTable=callStepDetailTable;
-			context.callHierarchyTree=callHierarchyTree;
-			context.errorLog=new ErrorLog() {
-			};
-			context.cweIdLabel = new JLabel("cwe");
-			supportToTest = new SecHubToolWindowUISupport(context);
-			supportToTest.initialize();
-			frame.pack();
-			frame.setVisible(true);
-			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            JPanel southPanel = new JPanel();
+            JLabel reportFindingLabel = new JLabel("No finding selected");
+            JLabel callStepLabel = new JLabel("No call step selected");
+            southPanel.add(reportFindingLabel);
+            southPanel.add(new JLabel("---"));
+            southPanel.add(callStepLabel);
+            frame.add(southPanel, BorderLayout.SOUTH);
 
-			supportToTest.setFindingModel(model);
-			supportToTest.addCallStepChangeListener((callStep, showEditor) -> {
-				callStepLabel.setText(callStep.getRelevantPart()+" showEditor="+showEditor);
-			});
+            callHierarchyTree.setPreferredSize(new Dimension(800, 600));
 
-			supportToTest.addReportFindingSelectionChangeListener((finding) -> {
-				reportFindingLabel.setText(finding.getDescription());
-			});
-		}
+            SecHubToolWindowUIContext context = new SecHubToolWindowUIContext();
+            context.findingTable = reportTable;
+            context.callHierarchyDetailTable = callStepDetailTable;
+            context.callHierarchyTree = callHierarchyTree;
+            context.errorLog = new ErrorLog() {
+            };
+            context.cweIdLabel = new JLabel("cwe");
+            context.findingTypeDetailsTabbedPane=tabbedPane;
+            context.callHierarchyTabComponent= callHierarchySplitPane;
+            context.descriptionAndSolutionTabbedPane=new JTabbedPane();
 
-		private FindingModel createTestModel() {
-			FindingModel model = new FindingModel();
-			append(model, "alpha", Severity.CRITICAL);
-			append(model, "beta", Severity.HIGH);
-			append(model, "gamma", Severity.MEDIUM);
-			append(model, "delta", Severity.LOW);
-			append(model, "epsilon", Severity.INFO);
-			return model;
-		}
+            JTextArea webRequestTextArea = new JTextArea();
+            JTextArea webResponseTextArea = new JTextArea();
+            JTextArea attackTextArea = new JTextArea();
 
-		private void append(FindingModel model, String prefix, Severity severity) {
-			int step = 1;
-			FindingNode node1 = FindingNode.builder().setId(findingCounter++).setDescription(generateDescription(prefix))
-					.setColumn(12).setLine(1).setLocation("/some/where/found/Xyz.java").setSeverity(severity)
-					.setCallStackStep(step++).setRelevantPart("i am relevant1")
-					.setSource("I am source... and i am relevant").build();
+            attackPanel.setLayout(new BorderLayout());
+            attackPanel.add(new JScrollPane(attackTextArea),BorderLayout.CENTER);
 
-			FindingNode node2 = FindingNode.builder().setId(findingCounter++).setDescription(generateDescription(prefix))
-					.setColumn(13).setLine(2).setLocation("/some/where/found/Xyz.java").setSeverity(severity)
-					.setCallStackStep(step++).setRelevantPart("i am relevant2")
-					.setSource("I am source... and i am relevant").build();
+            webRequestPanel.setLayout(new BorderLayout());
+            webRequestPanel.add(new JScrollPane(webRequestTextArea), BorderLayout.CENTER);
 
-			FindingNode node3 = FindingNode.builder().setId(findingCounter++).setDescription(generateDescription(prefix))
-					.setColumn(14).setLine(3).setLocation("/some/where/found/Xyz.java").setSeverity(severity)
-					.setCallStackStep(step++).setRelevantPart("i am relevant3")
-					.setSource("I am source... and i am relevant").build();
+            webResponsePanel.setLayout(new BorderLayout());
+            webResponsePanel.add(new JScrollPane(webResponseTextArea), BorderLayout.CENTER);
 
-			node1.getChildren().add(node2);
-			node2.getChildren().add(node3);
+            context.webRequestTextArea= webRequestTextArea;
+            context.webResponseTextArea= webResponseTextArea;
+            context.attackTextArea= attackTextArea;
+            context.attackTabComponent=attackPanel;
+            context.webRequestTabComponent=webRequestPanel;
+            context.webResponseTabComponent=webResponsePanel;
 
-			model.getFindings().add(node1);
-		}
 
-		private String generateDescription(String prefix) {
-			return "describe-" + prefix + "_" + findingCounter;
-		}
+            context.componentBuilder=new ComponentBuilder(){
 
-		private class SetNewModelAction extends AbstractAction {
-			private static final long serialVersionUID = 1L;
+                @Override
+                public JScrollPane createScrollPane(JComponent component) {
+                    return new JScrollPane(component);
+                }
+            };
+            context.findingRenderDataProvider = new FindingRenderDataProvider() {
 
-			private SetNewModelAction() {
-				putValue(Action.NAME, "set new model");
-			}
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				InternalUITest uiTest = InternalUITest.this;
-				uiTest.supportToTest.setFindingModel(uiTest.createTestModel());
-			}
+                @Override
+                public Icon getIconForScanType(ScanType scanType) {
+                    if (ScanType.CODE_SCAN.equals(scanType)){
+                        return codeScanIcon;
+                    }
+                    return null;
+                }
 
-		}
-	}
+                @Override
+                public Icon getIconForTrafficLight(TrafficLight trafficLight) {
+                    return null;
+                }
+
+            };
+            supportToTest = new SecHubToolWindowUISupport(context);
+            supportToTest.initialize();
+            frame.pack();
+            frame.setVisible(true);
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+            supportToTest.setFindingModel(model);
+            supportToTest.addCallStepChangeListener((callStep, showEditor) -> {
+                callStepLabel.setText(callStep.getRelevantPart() + " showEditor=" + showEditor);
+            });
+
+            supportToTest.addReportFindingSelectionChangeListener((finding) -> {
+                reportFindingLabel.setText(finding.getDescription());
+            });
+        }
+
+        private FindingModel createTestModel() {
+            FindingModel model = new FindingModel();
+
+            append(model, "alpha", Severity.CRITICAL, ScanType.CODE_SCAN);
+            append(model, "beta", Severity.HIGH,ScanType.CODE_SCAN);
+            append(model, "gamma", Severity.MEDIUM,ScanType.CODE_SCAN);
+            append(model, "delta", Severity.LOW,ScanType.CODE_SCAN);
+            append(model, "epsilon", Severity.INFO,ScanType.CODE_SCAN);
+            append(model, "zeta", Severity.INFO,ScanType.WEB_SCAN);
+            append(model, "eta", Severity.INFO,ScanType.INFRA_SCAN);
+            append(model, "theta", Severity.INFO,ScanType.SECRET_SCAN);
+            return model;
+        }
+
+        private void append(FindingModel model, String prefix, Severity severity, ScanType scanType) {
+            int step = 1;
+
+            SecHubFinding finding = new SecHubFinding();
+            if (scanType.equals(ScanType.WEB_SCAN)){
+                SecHubReportWeb web = new SecHubReportWeb();
+                finding.setWeb(web);
+                web.getRequest().setMethod("http");
+                web.getRequest().getHeaders().put("header-key-","header-value");
+                web.getResponse().setReasonPhrase("the reason...");
+                web.getResponse().getHeaders().put("header-key-","header-value");
+                web.getAttack().setVector("attack vector...");
+                SecHubReportWebEvidence evidence = new SecHubReportWebEvidence();
+                evidence.setSnippet("<Code> snippet with problem inside </code>");
+                web.getAttack().setEvidence(evidence);
+            }
+
+            FindingNode node1 = FindingNode.builder().setId(findingCounter++).setDescription(generateDescription(prefix))
+                    .setScanType(scanType).setName("the name for "+prefix)
+                    .setSecHubFinding(finding)
+                    .setColumn(12).setLine(1).setLocation("/some/where/found/Xyz.java").setSeverity(severity)
+                    .setCallStackStep(step++).setRelevantPart("i am relevant1")
+                    .setSource("I am source... and i am relevant").build();
+            FindingNode node2 = FindingNode.builder().setId(findingCounter++).setDescription(generateDescription(prefix))
+                    .setColumn(13).setLine(2).setLocation("/some/where/found/Xyz.java").setSeverity(severity)
+                    .setCallStackStep(step++).setRelevantPart("i am relevant2")
+                    .setSource("I am source... and i am relevant").build();
+
+            FindingNode node3 = FindingNode.builder().setId(findingCounter++).setDescription(generateDescription(prefix))
+                    .setColumn(14).setLine(3).setLocation("/some/where/found/Xyz.java").setSeverity(severity)
+                    .setCallStackStep(step++).setRelevantPart("i am relevant3")
+                    .setSource("I am source... and i am relevant").build();
+
+            node1.getChildren().add(node2);
+            node2.getChildren().add(node3);
+
+            model.getFindings().add(node1);
+        }
+
+        private String generateDescription(String prefix) {
+            return "describe-" + prefix + "_" + findingCounter;
+        }
+
+        private class SetNewModelAction extends AbstractAction {
+            private static final long serialVersionUID = 1L;
+
+            private SetNewModelAction() {
+                putValue(Action.NAME, "set new model");
+            }
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                InternalUITest uiTest = InternalUITest.this;
+                uiTest.supportToTest.setFindingModel(uiTest.createTestModel());
+            }
+
+        }
+    }
 }

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-package com.mercedesbenz.sechub.plugin.model.model;
+package com.mercedesbenz.sechub.plugin.model;
 
 import com.mercedesbenz.sechub.commons.model.SecHubCodeCallStack;
 import com.mercedesbenz.sechub.commons.model.SecHubFinding;

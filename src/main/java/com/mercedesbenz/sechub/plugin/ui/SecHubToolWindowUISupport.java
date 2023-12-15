@@ -1,20 +1,25 @@
 // SPDX-License-Identifier: MIT
 package com.mercedesbenz.sechub.plugin.ui;
 
+import com.mercedesbenz.sechub.commons.model.ScanType;
+import com.mercedesbenz.sechub.commons.model.Severity;
 import com.mercedesbenz.sechub.plugin.model.FindingModel;
 import com.mercedesbenz.sechub.plugin.model.FindingNode;
+import com.mercedesbenz.sechub.plugin.model.SecHubFindingoWebScanDataProvider;
 import com.mercedesbenz.sechub.plugin.util.ErrorLog;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * Because its very inconvenient and slow to test and develop the toolwindow
@@ -23,17 +28,26 @@ import java.util.List;
  * tweak ui without need to start intellj all time
  */
 public class SecHubToolWindowUISupport {
-
+    private static final String COLUMN_NAME_TYPE = "Type";
+    private static final String COLUMN_NAME_SEVERITY = "Severity";
+    private static final String COLUMN_NAME_ID = "Id";
+    private static final String COLUMN_NAME_NAME = "Name";
+    private static final String COLUMN_NAME_LOCATION = "Location";
+    private static final String[] REPORT_TABLE_COLUMN_NAMES = {COLUMN_NAME_ID, COLUMN_NAME_SEVERITY, COLUMN_NAME_TYPE, COLUMN_NAME_NAME, COLUMN_NAME_LOCATION};
     private final JTable reportTable;
     private final JTree callHierarchyTree;
     private final JTable callStepDetailTable;
     private final ErrorLog errorLog;
     private final JLabel cweIdLabel;
     private final SecHubToolWindowUIContext context;
+    private final JTabbedPane findingTypeDetailsTabbedPane;
 
     private FindingModel findingModel;
     private Set<CallStepChangeListener> callStepChangeListeners;
     private Set<ReportFindingSelectionChangeListener> reportFindingSelectionChangeListeners;
+
+    private SecHubFindingoWebScanDataProvider webRequestDataProvider = new SecHubFindingoWebScanDataProvider();
+
 
     public SecHubToolWindowUISupport(SecHubToolWindowUIContext context) {
         this.context = context;
@@ -42,12 +56,13 @@ public class SecHubToolWindowUISupport {
         this.callStepDetailTable = context.callHierarchyDetailTable;
         this.errorLog = context.errorLog;
         this.cweIdLabel = context.cweIdLabel;
+        this.findingTypeDetailsTabbedPane = context.findingTypeDetailsTabbedPane;
         this.callStepChangeListeners = new LinkedHashSet<>();
         this.reportFindingSelectionChangeListeners = new LinkedHashSet<>();
     }
 
     public interface CallStepChangeListener {
-        public void callStepChanged(FindingNode callStep, boolean doubleClick);
+        public void callStepChanged(FindingNode callStep, boolean openInEditor);
     }
 
     public interface ReportFindingSelectionChangeListener {
@@ -76,6 +91,7 @@ public class SecHubToolWindowUISupport {
         initCallHierarchyTree();
         initCallStepDetailTable();
     }
+
 
     private void initCweIdLink() {
         setCweId(null);
@@ -110,16 +126,21 @@ public class SecHubToolWindowUISupport {
 
     private void initCallStepDetailTable() {
         callStepDetailTable.setModel(new SecHubTableModel("Step", "Line", "Column", "Location"));
-        resetDetailsTablePresentation();
+        resetCallHierarchyStepTable();
     }
 
-    public void resetDetailsTablePresentation() {
+    public void resetCallHierarchyStepTable() {
         /* resize headers */
         TableColumnModel columnModel = callStepDetailTable.getColumnModel();
         columnModel.getColumn(0).setPreferredWidth(50);
         columnModel.getColumn(2).setPreferredWidth(50);
         columnModel.getColumn(2).setPreferredWidth(50);
         columnModel.getColumn(3).setPreferredWidth(400);
+    }
+
+
+    public FindingRenderDataProvider getRenderDataProvider() {
+        return context.findingRenderDataProvider;
     }
 
     private void initCallHierarchyTree() {
@@ -156,7 +177,7 @@ public class SecHubToolWindowUISupport {
 
     private void initReportTable() {
         findingModel = new FindingModel();
-        initTableWithModel(List.of());
+        initTableModelAndRowSorting();
 
         reportTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         reportTable.addMouseListener(new MouseAdapter() {
@@ -172,13 +193,14 @@ public class SecHubToolWindowUISupport {
             handleReportTableSelection(false);
         });
         reportTable.setMinimumSize(new Dimension(600, 300));
+
+        reportTable.getColumn(COLUMN_NAME_TYPE).setCellRenderer(new ReportScanTypeIconTableCellRenderer());
+        reportTable.getColumn(COLUMN_NAME_SEVERITY).setCellRenderer(new ReportSeverityTableCellRenderer());
     }
 
-    private void initTableWithModel(List<Object[]> elements) {
-        SecHubTableModel tableModel = new SecHubTableModel("Id", "Severity", "Type", "Name", "Location");
-        for (Object[] element : elements) {
-            tableModel.addRow(element);
-        }
+    private void initTableModelAndRowSorting() {
+
+        SecHubTableModel tableModel = new SecHubTableModel(REPORT_TABLE_COLUMN_NAMES);
         TableRowSorter<SecHubTableModel> rowSorter = new TableRowSorter<>(tableModel);
         rowSorter.setComparator(0, new Comparator<Integer>() {
             @Override
@@ -186,10 +208,28 @@ public class SecHubToolWindowUISupport {
                 return o1 - o2;
             }
         });
+        rowSorter.setComparator(1, new Comparator<Severity>() {
+            @Override
+            public int compare(Severity o1, Severity o2) {
+                return o1.compareTo(o2);
+            }
+        });
         reportTable.setModel(tableModel);
         reportTable.setRowSorter(rowSorter);
         rowSorter.toggleSortOrder(0); // initial sort on first column
 
+        /* set headers */
+        resetTablePresentation();
+    }
+
+    private void setReportTableElements(List<Object[]> elements) {
+        TableModel model = reportTable.getModel();
+        if (model instanceof SecHubTableModel) {
+            SecHubTableModel tableModel = (SecHubTableModel) model;
+            tableModel.setDataList(elements);
+        } else {
+            throw new IllegalStateException("Unsupported table model:" + model);
+        }
         /* resize headers */
         resetTablePresentation();
     }
@@ -212,6 +252,10 @@ public class SecHubToolWindowUISupport {
             return;
         }
         int rowViewIndex = reportTable.getSelectedRow();
+        if (rowViewIndex == -1) {
+            // cannot be selected in this case!
+            return;
+        }
         int row = reportTable.convertRowIndexToModel(rowViewIndex);
         Object obj = reportTable.getModel().getValueAt(row, 0);
         if (obj == null) {
@@ -240,40 +284,101 @@ public class SecHubToolWindowUISupport {
         cweIdLabel.setVisible(true);
     }
 
-    public void showFindingNode(FindingNode findingNode, boolean showEditor) {
+    public void showFindingNode(FindingNode findingNode, boolean openInEditor) {
+
+        handleCWEId(findingNode);
+        resetFindingNodeTabPane();
+        resetDescriptionAndSolutionTabPane(findingNode != null);
+
+        handleCallHierarchy(findingNode, openInEditor);
+        handleWebRequest(findingNode);
+        handleWebResponse(findingNode);
+        handleAttack(findingNode);
+    }
+
+    public void resetFindingNodeTabPane() {
+        // reset
+        context.findingTypeDetailsTabbedPane.removeAll();
+    }
+
+    public void resetDescriptionAndSolutionTabPane(boolean visible) {
+        // reset
+        context.descriptionAndSolutionTabbedPane.setVisible(visible);
+    }
+
+    private void handleCallHierarchy(FindingNode findingNode, boolean openInEditor) {
+        prepareCalHierarchyWhenNeccesary(findingNode, openInEditor);
+
+        if (findingNode != null && findingNode.canBeShownInCallHierarchy()) {
+            findingTypeDetailsTabbedPane.add("Call hierarchy", context.callHierarchyTabComponent);
+        }
+    }
+
+    private void handleWebRequest(FindingNode findingNode) {
+        if (findingNode != null && findingNode.canBeShownInWebRequest()) {
+            context.webRequestTextArea.setText(webRequestDataProvider.getWebRequestDescription(findingNode.getSecHubFinding()));
+            findingTypeDetailsTabbedPane.add("Request", context.componentBuilder.createScrollPane(context.webRequestTabComponent));
+        }
+    }
+
+    private void handleWebResponse(FindingNode findingNode) {
+        if (findingNode != null && findingNode.canBeShownInWebResponse()) {
+            context.webResponseTextArea.setText(webRequestDataProvider.getWebResponseDescription(findingNode.getSecHubFinding()));
+            findingTypeDetailsTabbedPane.add("Response", context.componentBuilder.createScrollPane(context.webResponseTabComponent));
+        }
+
+    }
+
+    private void handleAttack(FindingNode findingNode) {
+        if (findingNode != null && findingNode.canBeShownInAttack()) {
+            JComponent attackTabComponent = context.attackTabComponent;
+            // we must create a new scrollpane all time - otherwise tabbed pane makes problems with viewport handling!
+            findingTypeDetailsTabbedPane.add("Attack", context.componentBuilder.createScrollPane(attackTabComponent));
+            context.attackTextArea.setText(webRequestDataProvider.getWebAttackDescription(findingNode.getSecHubFinding()));
+        }
+    }
+
+    private void prepareCalHierarchyWhenNeccesary(FindingNode findingNode, boolean openInEditor) {
         SechubTreeModel hierarchyTreeModel = (SechubTreeModel) callHierarchyTree.getModel();
         SecHubRootTeeNode newRootNode = new SecHubRootTeeNode();
-
         if (findingNode == null) {
             hierarchyTreeModel.setRoot(newRootNode);
             setCweId(null);
             showCallStep(null, false);
             return;
         }
-        setCweId(findingNode.getCweId());
+        if (findingNode.canBeShownInCallHierarchy()) {
+            buildCallHierarchyTreeNodes(newRootNode, findingNode);
+            hierarchyTreeModel.setRoot(newRootNode);
 
-        buildCallhierarchyTreeNodes(newRootNode, findingNode);
-        hierarchyTreeModel.setRoot(newRootNode);
+            showCallStep(findingNode, openInEditor);
+            callHierarchyTree.addSelectionInterval(0, 0);
+        }
 
         /* inform listeners */
         for (ReportFindingSelectionChangeListener listener : reportFindingSelectionChangeListeners) {
             listener.reportFindingSelectionChanged(findingNode);
         }
-
-        showCallStep(findingNode, showEditor);
-        callHierarchyTree.addSelectionInterval(0, 0);
     }
 
-    private void buildCallhierarchyTreeNodes(SecHubTreeNode parent, FindingNode findingNode) {
+    private void handleCWEId(FindingNode findingNode) {
+        if (findingNode != null) {
+            setCweId(findingNode.getCweId());
+        } else {
+            setCweId(null);
+        }
+    }
+
+    private void buildCallHierarchyTreeNodes(SecHubTreeNode parent, FindingNode findingNode) {
         SecHubTreeNode treeNode = new SecHubTreeNode(findingNode);
         parent.add(treeNode);
 
         for (FindingNode child : findingNode.getChildren()) {
-            buildCallhierarchyTreeNodes(parent, child);
+            buildCallHierarchyTreeNodes(parent, child);
         }
     }
 
-    private void showCallStep(FindingNode callStep, boolean showEditor) {
+    private void showCallStep(FindingNode callStep, boolean openInEditor) {
         /* show in detail table */
         SecHubTableModel callStepTableModel = (SecHubTableModel) callStepDetailTable.getModel();
         callStepTableModel.removeAllRows();
@@ -286,7 +391,7 @@ public class SecHubToolWindowUISupport {
 
         /* inform listeners */
         for (CallStepChangeListener listener : callStepChangeListeners) {
-            listener.callStepChanged(callStep, showEditor);
+            listener.callStepChanged(callStep, openInEditor);
         }
     }
 
@@ -300,12 +405,55 @@ public class SecHubToolWindowUISupport {
                 continue;
             }
             Object[] rowData = new Object[]{finding.getId(), finding.getSeverity(), finding.getScanType(), finding.getName(),
-                    finding.getFileName()};
+                    finding.getLocation()};
             elements.add(rowData);
         }
 
         this.findingModel = findingModel;
-        initTableWithModel(elements);
+        setReportTableElements(elements);
     }
 
+    private class ReportScanTypeIconTableCellRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
+            super.getTableCellRendererComponent(table, value, selected, focus, row, column);
+            //noinspection unchecked
+            if (value instanceof ScanType) {
+                ScanType scanType = (ScanType) value;
+                Icon icon = getRenderDataProvider().getIconForScanType(scanType);
+                String text = getRenderDataProvider().getTextForScanType(scanType);
+                setIcon(icon);
+                setText(text);
+
+            } else {
+                setIcon(null);
+                setText(null);
+            }
+            return this;
+        }
+
+    }
+
+    ;
+
+    private class ReportSeverityTableCellRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean selected, boolean focus, int row, int column) {
+            super.getTableCellRendererComponent(table, value, selected, focus, row, column);
+            //noinspection unchecked
+            if (value instanceof Severity) {
+                Severity severity = (Severity) value;
+                String text = getRenderDataProvider().getTextForSeverity(severity);
+                setText(text);
+
+            } else {
+                setIcon(null);
+                setText(null);
+            }
+            return this;
+        }
+
+    }
+
+    ;
 }

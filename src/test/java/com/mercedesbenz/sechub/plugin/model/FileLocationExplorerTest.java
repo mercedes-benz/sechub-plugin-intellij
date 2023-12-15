@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.util.List;
 
-import static com.mercedesbenz.sechub.plugin.model.model.TestResourceHelper.getEnsuredTestPath;
+import static com.mercedesbenz.sechub.plugin.model.TestResourceHelper.getEnsuredTestPath;
 import static org.junit.Assert.*;
 
 public class FileLocationExplorerTest {

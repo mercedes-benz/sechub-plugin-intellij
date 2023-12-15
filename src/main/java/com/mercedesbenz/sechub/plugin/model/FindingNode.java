@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.mercedesbenz.sechub.commons.model.ScanType;
+import com.mercedesbenz.sechub.commons.model.SecHubFinding;
 import com.mercedesbenz.sechub.commons.model.Severity;
 
 /**
@@ -15,14 +16,18 @@ import com.mercedesbenz.sechub.commons.model.Severity;
  */
 public class FindingNode implements Comparable<FindingNode> {
 
+	private Object monitor= new Object();
 	private FindingNode parent = null;
+
+	private SecHubFinding secHubFinding;
+
 	private List<FindingNode> children = new LinkedList<FindingNode>();
 
 	private Integer cweId;
 	private String name;
 
 	private String description;
-	private String location;
+	String location;
 	private Integer line;
 	private Integer column;
 	private String relevantPart;
@@ -35,6 +40,7 @@ public class FindingNode implements Comparable<FindingNode> {
 	private Map<String,Object> metaDataCache;
 
 	private ScanType scanType;
+	private String solution;
 
 	private FindingNode() {
 	}
@@ -53,6 +59,8 @@ public class FindingNode implements Comparable<FindingNode> {
 		private Integer cweId;
 
 		private ScanType scanType;
+		private String solution;
+		private SecHubFinding secHubFinding;
 
 		private FindingNodeBuilder() {
 
@@ -69,6 +77,10 @@ public class FindingNode implements Comparable<FindingNode> {
 
 		public FindingNodeBuilder setDescription(String description) {
 			this.description = description;
+			return this;
+		}
+		public FindingNodeBuilder setSolution(String solution) {
+			this.solution = solution;
 			return this;
 		}
 
@@ -116,6 +128,10 @@ public class FindingNode implements Comparable<FindingNode> {
 			this.cweId=cweId;
 			return this;
 		}
+		public FindingNodeBuilder setSecHubFinding(SecHubFinding secHubFinding) {
+			this.secHubFinding=secHubFinding;
+			return this;
+		}
 
 		public FindingNode build() {
 			FindingNode node = new FindingNode();
@@ -131,6 +147,8 @@ public class FindingNode implements Comparable<FindingNode> {
 			node.id = id;
 			node.cweId=cweId;
 			node.scanType=scanType;
+			node.solution=solution;
+			node.secHubFinding=secHubFinding;
 
 			calculateFileNameAndPath(node);
 
@@ -192,6 +210,14 @@ public class FindingNode implements Comparable<FindingNode> {
 
 	public String getDescription() {
 		return description;
+	}
+
+	public String getSolution(){
+		return solution;
+	}
+
+	public SecHubFinding getSecHubFinding() {
+		return secHubFinding;
 	}
 
 	public String getLocation() {
@@ -264,7 +290,38 @@ public class FindingNode implements Comparable<FindingNode> {
 		return scanType;
 	}
 
-	private Object monitor= new Object();
+	public boolean canBeShownInCallHierarchy() {
+		ScanType scanType = getScanType();
+		if (ScanType.WEB_SCAN.equals(scanType)) {
+			return false;
+		}
+		if (ScanType.INFRA_SCAN.equals(scanType)) {
+			return false;
+		}
+		return true;
+	}
+
+	public boolean canBeShownInWebRequest() {
+		ScanType scanType = getScanType();
+		if (ScanType.WEB_SCAN.equals(scanType)) {
+			return true;
+		}
+		return false;
+	}
+	public boolean canBeShownInWebResponse() {
+		ScanType scanType = getScanType();
+		if (ScanType.WEB_SCAN.equals(scanType)) {
+			return true;
+		}
+		return false;
+	}
+	public boolean canBeShownInAttack() {
+		ScanType scanType = getScanType();
+		if (ScanType.WEB_SCAN.equals(scanType)) {
+			return true;
+		}
+		return false;
+	}
 
 	@Override
 	public String toString() {

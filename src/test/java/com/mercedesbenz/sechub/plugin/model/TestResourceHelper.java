@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-package com.mercedesbenz.sechub.plugin.model.model;
+package com.mercedesbenz.sechub.plugin.model;
 
 import java.io.File;
 import java.nio.file.Path;
