@@ -3,18 +3,8 @@ package com.mercedesbenz.sechub.plugin.idea.window;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.fileEditor.OpenFileDescriptor;
-import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.project.ProjectUtil;
-import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Splitter;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowBalloonShowOptions;
-import com.intellij.openapi.wm.ToolWindowManager;
-import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.ColoredTreeCellRenderer;
 import com.intellij.ui.JBSplitter;
 import com.intellij.ui.OnePixelSplitter;
@@ -27,9 +17,8 @@ import com.intellij.ui.treeStructure.Tree;
 import com.mercedesbenz.sechub.commons.model.TrafficLight;
 import com.mercedesbenz.sechub.plugin.idea.IntellijComponentFactory;
 import com.mercedesbenz.sechub.plugin.idea.IntellijRenderDataProvider;
-import com.mercedesbenz.sechub.plugin.idea.compatiblity.VirtualFileCompatibilityLayer;
+import com.mercedesbenz.sechub.plugin.idea.IntellijShowInEditorSupport;
 import com.mercedesbenz.sechub.plugin.idea.util.ErrorLogger;
-import com.mercedesbenz.sechub.plugin.model.FileLocationExplorer;
 import com.mercedesbenz.sechub.plugin.model.FindingModel;
 import com.mercedesbenz.sechub.plugin.model.FindingNode;
 import com.mercedesbenz.sechub.plugin.ui.SecHubToolWindowUIContext;
@@ -37,7 +26,6 @@ import com.mercedesbenz.sechub.plugin.ui.SecHubToolWindowUISupport;
 import com.mercedesbenz.sechub.plugin.ui.SecHubTreeNode;
 import com.mercedesbenz.sechub.plugin.util.SimpleStringUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.text.Caret;
@@ -46,9 +34,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.UUID;
 
 public class SecHubReportPanel {
@@ -56,7 +41,8 @@ public class SecHubReportPanel {
     private static final int SECHUB_REPORT_DEFAULT_GAP = 5;
     private static SecHubReportPanel INSTANCE;
 
-    private SecHubToolWindowUISupport support;
+    private SecHubToolWindowUISupport uiSupport;
+    private IntellijShowInEditorSupport showInEditorSupport;
     private Icon callHierarchyElementIcon;
 
     private ToolWindow toolWindow;
@@ -304,6 +290,9 @@ public class SecHubReportPanel {
     }
 
     private void createAndInstallSupport() {
+
+        showInEditorSupport=new IntellijShowInEditorSupport();
+
         SecHubToolWindowUIContext context = new SecHubToolWindowUIContext();
         context.findingTable = reportTable;
 
@@ -329,16 +318,16 @@ public class SecHubReportPanel {
         context.attackTextArea = attackTextArea;
         context.attackTabComponent = attackPanel;
 
-        support = new SecHubToolWindowUISupport(context);
+        uiSupport = new SecHubToolWindowUISupport(context);
 
-        support.addCallStepChangeListener((callStep, showEditor) -> {
+        uiSupport.addCallStepChangeListener((callStep, showEditor) -> {
             reportSourceCodeTextArea.setText(callStep == null ? "" : SimpleStringUtil.toStringTrimmed(callStep.getSource()) + "\n");
             /* now show in editor as well */
             if (showEditor) {
                 showInEditor(callStep);
             }
         });
-        support.addReportFindingSelectionChangeListener((finding) -> {
+        uiSupport.addReportFindingSelectionChangeListener((finding) -> {
             findingLabel.setText("Finding " + finding.getId() + ":");
             findingDescriptionTextArea.setText(finding.getDescription() == null ? "No description available" : finding.getDescription());
             if (finding.getSolution() == null) {
@@ -351,7 +340,7 @@ public class SecHubReportPanel {
                 findingSolutionTextArea.setText(finding.getSolution());
             }
         });
-        support.initialize();
+        uiSupport.initialize();
     }
 
     private void installDragAndDrop() {
@@ -406,56 +395,7 @@ public class SecHubReportPanel {
         if (!callStep.canBeShownInCallHierarchy()) {
             return;
         }
-        Project[] projects = ProjectManager.getInstance().getOpenProjects();
-        Project activeProject = null;
-        for (Project project : projects) {
-            Window window = WindowManager.getInstance().suggestParentWindow(project);
-            if (window != null && window.isActive()) {
-                activeProject = project;
-            }
-        }
-        if (activeProject == null) {
-            LOG.error("No active project found, so cannot show current call step in editor!");
-            return;
-        }
-        FileLocationExplorer explorer = new FileLocationExplorer();
-        VirtualFile projectDir = ProjectUtil.guessProjectDir(activeProject);
-        if (projectDir == null) {
-            return;
-        }
-
-        explorer.getSearchFolders().add(VirtualFileCompatibilityLayer.toNioPath(projectDir));
-
-        List<Path> pathes = null;
-        try {
-            pathes = explorer.searchFor(callStep.getLocation());
-        } catch (IOException e) {
-            LOG.error("Lookup for sources failed", e);
-            return;
-        }
-        if (pathes.isEmpty()) {
-            ToolWindowBalloonShowOptions options = new ToolWindowBalloonShowOptions(toolWindow.getId(), MessageType.WARNING,
-                    "No source found for location: " + callStep.getLocation(), null, null, (builder) -> {
-                builder.setFadeoutTime(1500);
-            });
-
-            ToolWindowManager.getInstance(activeProject).notifyByBalloon(options);
-            return;
-        }
-        if (pathes.size() > 1) {
-            LOG.warn("Multiple paths found using only first one");
-        }
-        Path first = pathes.get(0);
-        @Nullable VirtualFile firstAsVirtualFile = VirtualFileManager.getInstance().findFileByUrl(first.toUri().toString());
-        if (firstAsVirtualFile == null) {
-            LOG.error("Found in normal filesystem but not in virtual one:" + first);
-            return;
-        }
-        int line = callStep.getLine();
-        int column = callStep.getColumn();
-
-        OpenFileDescriptor fileDescriptor = new OpenFileDescriptor(activeProject, firstAsVirtualFile, line - 1, column);
-        fileDescriptor.navigateInEditor(activeProject, true);
+        showInEditorSupport.showInEditor(toolWindow, callStep);
     }
 
 
@@ -471,7 +411,7 @@ public class SecHubReportPanel {
         findingSolutionTextArea.setText("");
         reportSourceCodeTextArea.setText("");
         descriptionAndSolutionTabbedPane.setVisible(false);
-        support.showFindingNode(null, false);
+        uiSupport.showFindingNode(null, false);
 
         UUID jobUUID = model.getJobUUID();
 
@@ -487,18 +427,18 @@ public class SecHubReportPanel {
             scanResultForJobText.setText(jobUUID.toString());
         }
 
-        trafficLightIconLabel.setIcon(support.getRenderDataProvider().getIconForTrafficLight(trafficLight));
+        trafficLightIconLabel.setIcon(uiSupport.getRenderDataProvider().getIconForTrafficLight(trafficLight));
         trafficLightIconLabel.setToolTipText("Traffic light is:" + trafficLight.toString());
 
-        support.setFindingModel(model);
+        uiSupport.setFindingModel(model);
     }
 
     public void reset() {
         update(new FindingModel());
 
-        support.resetTablePresentation();
-        support.resetCallHierarchyStepTable();
-        support.resetFindingNodeTabPane();
-        support.resetDescriptionAndSolutionTabPane(false);
+        uiSupport.resetTablePresentation();
+        uiSupport.resetCallHierarchyStepTable();
+        uiSupport.resetFindingNodeTabPane();
+        uiSupport.resetDescriptionAndSolutionTabPane(false);
     }
 }

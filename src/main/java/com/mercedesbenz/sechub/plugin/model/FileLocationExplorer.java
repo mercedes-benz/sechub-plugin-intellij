@@ -39,6 +39,18 @@ public class FileLocationExplorer {
 			return result;
 		}
 
+		/* fast approach - let's assume path can be directly calculated */
+		for (Path searchFolder : searchFolders) {
+			Path resolved = searchFolder.resolve(location);
+			if (Files.exists(resolved)){
+				result.add(resolved);
+			}
+		}
+		if (! result.isEmpty()){
+			return result;
+		}
+
+		/* not found directly, now try to find with regular expression approach: */
 		FileSystem defaultFileSystem = FileSystems.getDefault();
 		String separator = defaultFileSystem.getSeparator();
 
