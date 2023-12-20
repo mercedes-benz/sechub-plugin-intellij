@@ -6,7 +6,7 @@ plugins {
     id 'java'
     // see https://github.com/JetBrains/gradle-intellij-plugin and
     // https://plugins.gradle.org/plugin/org.jetbrains.intellij
-    id 'org.jetbrains.intellij' version '1.1.6'
+    id 'org.jetbrains.intellij' version '1.14.2'
 
     // https://github.com/JetBrains/gradle-changelog-plugin#initializechangelog
     id("org.jetbrains.changelog") version "1.2.1"
@@ -21,6 +21,7 @@ repositories {
     mavenCentral()
 }
 
+// Info: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#configuration-intellij-extension
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'lib')
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
@@ -30,13 +31,13 @@ apply plugin: "org.jetbrains.intellij"
 // apply plugin: 'org.jetbrains.changelog'
 
 group 'com.mercedesbenz.sechub'
-version '0.3.0'
+version '0.4.0'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 tasks.withType(JavaCompile) {
-    options.release = 8
+    options.release = 17
 }
 
 sourceSets{
@@ -49,9 +50,10 @@ sourceSets{
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    // we chose 2020.3 - to have compatibility to Android Studio
-    // https://developer.android.com/studio/releases/#arctic-fox
-    version= '2020.3'
+    // we chose 2023.1.1 - to have compatibility to Android Studio (Hedgehog, 2023.1.1 is last stable release at the moment)
+    // https://developer.android.com/studio/releases/
+    // https://plugins.jetbrains.com/docs/intellij/android-studio-releases-list.html#2023
+    version= '2023.1.1'
 }
 
 /*
@@ -65,7 +67,7 @@ tasks {
 */
 
 patchPluginXml {
-    sinceBuild = '201'
+    sinceBuild = '231'
     untilBuild =''
 }
 
@@ -77,15 +79,28 @@ signPlugin {
 
 publishPlugin {
     token = System.getenv("SECHUB_INTELLIJ_PUBLISH_TOKEN")
-    channels = ['alpha']
 }
 
 asciidoctor {
     baseDirFollowsSourceDir()
     sources {
-        include 'user-guide.adoc'
+        include 'user-guide.adoc', 'plugin-development.adoc'
     }
     outputDir  file('build/docs/asciidoc')
+
+    attributes 'build-gradle': file('build.gradle'),
+            'source-highlighter': 'coderay',
+            'toc': 'left',
+            'toclevels': '5',
+            'icons': 'font',
+            'setanchors': 'true',
+            'idprefix': '',
+            'idseparator': '-',
+            'docinfo1': 'true',
+            'sectnums': 'true',
+            'sectnumlevels': '5',
+            'version': rootProject.version
+
 }
 
 /*

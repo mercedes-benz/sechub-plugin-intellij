@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.mercedes-benz.sechub.sechub-plugin-intellij</id>
     <name>SecHub</name>
-    <vendor url="https://www.mercedes-benz-techinnovation.com/">Mercedes-Benz Tech Innovation GmbH</vendor>
+    <vendor>mercedes-benz-tech-innovation</vendor>
 
     <description><![CDATA[
     <a href="https://github.com/mercedes-benz/sechub-plugin-intellij">GitHub project page</a><br>
@@ -16,14 +16,20 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <toolWindow id="SecHub" icon="/icons/toolWindowSecHub.svg" factoryClass="com.mercedesbenz.sechub.window.SecHubToolWindowFactory" anchor="left"/>
+        <toolWindow id="SecHub" icon="/icons/toolWindowSecHub.svg" factoryClass="com.mercedesbenz.sechub.plugin.idea.window.SecHubToolWindowFactory" anchor="left"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
-        <action id="com.mercedesbenz.sechub.action.SechubImportAction" class="com.mercedesbenz.sechub.action.SechubImportAction"
-                text="Import SecHub Report" description="Import an SecHub Report JSON file into IDE">
-            <add-to-group group-id="ToolsMenu" anchor="first" />
+        <action id="com.mercedesbenz.sechub.plugin.idea.action.SechubOpenReportFromFileSystemAction" class="com.mercedesbenz.sechub.plugin.idea.action.SechubOpenReportFromFileSystemAction"
+                text="Import SecHub Report"
+                description="Import an SecHub Report JSON file into IDE"
+
+        ><add-to-group group-id="ToolsMenu" anchor="first" />
         </action>
+        <action id="com.mercedesbenz.sechub.plugin.idea.action.SechubResetReportAction" class="com.mercedesbenz.sechub.plugin.idea.action.SechubResetReportAction"
+                text="Reset SecHub Report"
+                description="Remove all existing SecHub report data"
+        ></action>
     </actions>
 </idea-plugin>
