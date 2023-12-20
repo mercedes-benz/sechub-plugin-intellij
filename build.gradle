@@ -79,7 +79,7 @@ signPlugin {
 
 publishPlugin {
     token = System.getenv("SECHUB_INTELLIJ_PUBLISH_TOKEN")
-    channels = ['alpha']
+    channels = ['beta']
 }
 
 asciidoctor {

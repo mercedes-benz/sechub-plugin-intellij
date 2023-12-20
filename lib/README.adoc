@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 == Libraries
 ==== `sechub-java-api-all-0.0.0`
 Is a fat jar which is build inside SecHub (https://github.com/mercedesbenz/sechub) rootfolder with

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: MIT --->
 # Changelog
 
 ## [0.3.0]

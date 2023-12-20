@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 :imagesdir: ./images
 :toc:
 :toc-title: Table of contents
@@ -70,3 +71,34 @@ https://plugins.jetbrains.com/docs/intellij/basic-action-system.html#building-ui
 
 == Deployment
 Please read https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html for details.
+
+=== Deployment helper script
+Here a helper script to prepare a signed plugin deployment:
+
+[sourc,sh]
+----
+#!/bin/bash
+echo "Preparing for SecHub intellij plugin deployment"
+echo "----------------------------------------------------------------------------------"
+export SECHUB_CERTIFICATE_LOCATION=~/.keystores/deployment-keystore-certificate.crt <1>
+export SECHUB_CERTIFICATE_CHAIN=$(<$SECHUB_CERTIFICATE_LOCATION)
+export SECHUB_PRIVATE_KEY_LOCATION=~/.keystores/your-private-deployment-key.pem <2>
+export SECHUB_PRIVATE_KEY=$(<$SECHUB_PRIVATE_KEY_LOCATION)
+
+stty_orig=$(stty -g)
+
+stty -echo
+
+read -p "Enter private key: " SECHUB_PRIVATE_KEY_PASSWORD
+export SECHUB_PRIVATE_KEY_PASSWORD
+echo "" # new line...
+read -p "Enter intellij publish token:" SECHUB_INTELLIJ_PUBLISH_TOKEN
+export SECHUB_INTELLIJ_PUBLISH_TOKEN
+echo "" # new line ...
+
+stty $stty_orig
+echo "All prepared, you can now switch to plugin root folder and execute './gradlew publishPlugin''"
+
+----
+<1> Your cert file
+<2> Your private key file

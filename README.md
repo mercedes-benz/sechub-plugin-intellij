@@ -21,7 +21,7 @@ Simply search for term `sechub` in your marketplace settings and install the lat
 ### Alpha versions
 Alpha versions are versions not already full tested but available for community to test the newest features etc.
  
-When you want to install those plugins, you must add custom plugin repository https://plugins.jetbrains.com/plugins/alpha/list but it is
+When you want to install those plugins, you must add custom plugin repository https://plugins.jetbrains.com/plugins/beta/list but it is
 necessary to add this repository to your IDE settings.
 
 After this you will be able to install the plugin as usual.

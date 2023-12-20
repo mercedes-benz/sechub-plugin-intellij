@@ -4,7 +4,6 @@ package com.mercedesbenz.sechub.plugin.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.util.Objects;
 
 import javax.swing.*;
 
@@ -102,7 +101,7 @@ public class SecHubToolWindowUISupportTestMain {
             context.webResponseTabComponent=webResponsePanel;
 
 
-            context.componentBuilder=new ComponentBuilder(){
+            context.componentFactory =new ComponentBuilder(){
 
                 @Override
                 public JScrollPane createScrollPane(JComponent component) {

@@ -4,7 +4,6 @@ package com.mercedesbenz.sechub.plugin.ui;
 import com.mercedesbenz.sechub.plugin.util.ErrorLog;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class SecHubToolWindowUIContext {
     public JTable findingTable;
@@ -24,5 +23,5 @@ public class SecHubToolWindowUIContext {
     public JTextArea attackTextArea;
     public JTextArea webResponseTextArea;
 
-    public ComponentBuilder componentBuilder;
+    public ComponentBuilder componentFactory;
 }

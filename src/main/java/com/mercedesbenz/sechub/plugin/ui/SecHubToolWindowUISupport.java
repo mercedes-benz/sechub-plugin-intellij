@@ -317,14 +317,14 @@ public class SecHubToolWindowUISupport {
     private void handleWebRequest(FindingNode findingNode) {
         if (findingNode != null && findingNode.canBeShownInWebRequest()) {
             context.webRequestTextArea.setText(webRequestDataProvider.getWebRequestDescription(findingNode.getSecHubFinding()));
-            findingTypeDetailsTabbedPane.add("Request", context.componentBuilder.createScrollPane(context.webRequestTabComponent));
+            findingTypeDetailsTabbedPane.add("Request", context.componentFactory.createScrollPane(context.webRequestTabComponent));
         }
     }
 
     private void handleWebResponse(FindingNode findingNode) {
         if (findingNode != null && findingNode.canBeShownInWebResponse()) {
             context.webResponseTextArea.setText(webRequestDataProvider.getWebResponseDescription(findingNode.getSecHubFinding()));
-            findingTypeDetailsTabbedPane.add("Response", context.componentBuilder.createScrollPane(context.webResponseTabComponent));
+            findingTypeDetailsTabbedPane.add("Response", context.componentFactory.createScrollPane(context.webResponseTabComponent));
         }
 
     }
@@ -333,7 +333,7 @@ public class SecHubToolWindowUISupport {
         if (findingNode != null && findingNode.canBeShownInAttack()) {
             JComponent attackTabComponent = context.attackTabComponent;
             // we must create a new scrollpane all time - otherwise tabbed pane makes problems with viewport handling!
-            findingTypeDetailsTabbedPane.add("Attack", context.componentBuilder.createScrollPane(attackTabComponent));
+            findingTypeDetailsTabbedPane.add("Attack", context.componentFactory.createScrollPane(attackTabComponent));
             context.attackTextArea.setText(webRequestDataProvider.getWebAttackDescription(findingNode.getSecHubFinding()));
         }
     }

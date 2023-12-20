@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 package com.mercedesbenz.sechub.plugin.idea.window;
 
 import com.intellij.icons.AllIcons;
@@ -24,7 +25,7 @@ import com.intellij.ui.components.panels.VerticalLayout;
 import com.intellij.ui.table.JBTable;
 import com.intellij.ui.treeStructure.Tree;
 import com.mercedesbenz.sechub.commons.model.TrafficLight;
-import com.mercedesbenz.sechub.plugin.idea.IntellijComponentBuilder;
+import com.mercedesbenz.sechub.plugin.idea.IntellijComponentFactory;
 import com.mercedesbenz.sechub.plugin.idea.IntellijRenderDataProvider;
 import com.mercedesbenz.sechub.plugin.idea.compatiblity.VirtualFileCompatibilityLayer;
 import com.mercedesbenz.sechub.plugin.idea.util.ErrorLogger;
@@ -313,7 +314,7 @@ public class SecHubReportPanel {
         context.errorLog = ErrorLogger.getInstance();
         context.cweIdLabel = cweIdLabel;
         context.findingRenderDataProvider = new IntellijRenderDataProvider();
-        context.componentBuilder=new IntellijComponentBuilder();
+        context.componentFactory =new IntellijComponentFactory();
         context.findingTypeDetailsTabbedPane = southTabPane;
 
         context.descriptionAndSolutionTabbedPane = descriptionAndSolutionTabbedPane;
