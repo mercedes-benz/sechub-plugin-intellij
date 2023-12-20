@@ -105,7 +105,7 @@ Inside the new opened file chooser select the zip file in `${plugin-repo-locatio
 TIP: You can download the current Android Studio from https://developer.android.com/studio
 
 
-=== Publishing to JetBrain marketplace
+=== Publishing to Marketplace
 NOTE: Please read https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html for details.
 
 ==== Manual
