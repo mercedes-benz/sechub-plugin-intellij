@@ -12,19 +12,11 @@ Please look at [user guide](src/docs/asciidoc/user-guide.adoc) for more informat
 
 
 ## Installation
-You will find the plugin at IntelliJ marketplace when searching for term `sechub`.
-It's also listed at https://plugins.jetbrains.com/plugin/15424-sechub
+You will find the plugin at IntelliJ marketplace when searching for term `sechub`
+(it's also listed at https://plugins.jetbrains.com/plugin/23379-sechub).
 
 ### Stable versions
 Simply search for term `sechub` in your marketplace settings and install the latest plugin.
-
-### Alpha versions
-Alpha versions are versions not already full tested but available for community to test the newest features etc.
- 
-When you want to install those plugins, you must add custom plugin repository https://plugins.jetbrains.com/plugins/beta/list but it is
-necessary to add this repository to your IDE settings.
-
-After this you will be able to install the plugin as usual.
 
 ## Contributing
 
