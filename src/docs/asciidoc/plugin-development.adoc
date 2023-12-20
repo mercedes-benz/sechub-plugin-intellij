@@ -108,6 +108,11 @@ TIP: You can download the current Android Studio from https://developer.android.
 === Publishing to JetBrain marketplace
 NOTE: Please read https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html for details.
 
+==== Manual
+Open https://plugins.jetbrains.com/plugin/23379-sechub
+and upload the plugin manually.
+
+==== Automation
 Here a helper script to prepare a signed plugin deployment:
 
 [sourc,sh]
