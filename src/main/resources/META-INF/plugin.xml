@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.mercedes-benz.sechub.sechub-plugin-intellij</id>
     <name>SecHub</name>
-    <vendor url="https://www.mercedes-benz-techinnovation.com/">Mercedes-Benz Tech Innovation GmbH</vendor>
+    <vendor>mercedes-benz-tech-innovation</vendor>
 
     <description><![CDATA[
     <a href="https://github.com/mercedes-benz/sechub-plugin-intellij">GitHub project page</a><br>

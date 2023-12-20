@@ -79,7 +79,6 @@ signPlugin {
 
 publishPlugin {
     token = System.getenv("SECHUB_INTELLIJ_PUBLISH_TOKEN")
-    channels = ['beta']
 }
 
 asciidoctor {
