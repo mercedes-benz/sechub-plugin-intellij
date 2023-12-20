@@ -11,7 +11,7 @@
 This is an IntelliJ plugin for a convenient IDE integration of https://github.com/mercedes-benz/sechub[SecHub]
 
 The project website can be found at https://github.com/mercedes-benz/sechub-plugin-intellij[SecHub Plugin IntelliJ]
-Marketplace entry available at https://plugins.jetbrains.com/plugin/15424-sechub[IntelliJ Plugin Page]
+Marketplace entry available at https://plugins.jetbrains.com/plugin/23379-sechub[IntelliJ Plugin Page]
 
 == Features
 Here you will find all implemented features of the plugin. Planned features and ideas can be found at
@@ -24,6 +24,7 @@ by dragging a report file from the file explorer into the report table (marked a
 
 .Overview of the SecHub tool window
 image::sechub-toolwindow-overview.png[]
+TIP: Since V0.4.0 the UI has been improved/changed a bit, but functionality is still as described
 
 
 === Use call hierarchy view to traverse finding steps
