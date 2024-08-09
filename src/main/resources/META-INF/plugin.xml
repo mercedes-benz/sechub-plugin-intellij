@@ -17,6 +17,12 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
         <toolWindow id="SecHub" icon="/icons/toolWindowSecHub.svg" factoryClass="com.mercedesbenz.sechub.plugin.idea.window.SecHubToolWindowFactory" anchor="left"/>
+
+        <applicationService serviceImplementation="org.intellij.sdk.settings.AppSettings"/>
+
+        <applicationConfigurable parentId="tools" instance="org.intellij.sdk.settings.AppSettingsConfigurable"
+                                 id="org.intellij.sdk.settings.AppSettingsConfigurable"
+                                 displayName="SecHub Configuration"/>
     </extensions>
 
     <actions>
