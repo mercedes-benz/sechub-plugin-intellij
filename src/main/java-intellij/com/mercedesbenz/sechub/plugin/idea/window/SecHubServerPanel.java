@@ -9,12 +9,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 
-public class SecHubServerPanel implements SecHubPanel{
+public class SecHubServerPanel implements SecHubPanel {
 
     private static final Logger LOG = Logger.getInstance(SecHubServerPanel.class);
     private static SecHubServerPanel INSTANCE;
+    private JBTextField serverUrlText;
     private JPanel contentPanel;
-    private final JBTextField serverUrlText = new JBTextField();
 
     public SecHubServerPanel() {
         createComponents();
@@ -44,6 +44,7 @@ public class SecHubServerPanel implements SecHubPanel{
 
         JPanel top = new JPanel(new BorderLayout());
         String serverURL = Objects.requireNonNull(AppSettings.getInstance().getState()).serverURL;
+        serverUrlText = new JBTextField();
         serverUrlText.setText(serverURL);
         serverUrlText.setEditable(false);
 

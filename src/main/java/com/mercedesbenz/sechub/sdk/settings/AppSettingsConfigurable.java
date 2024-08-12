@@ -17,9 +17,8 @@ import java.util.Objects;
  */
 final class AppSettingsConfigurable implements Configurable {
 
-    private AppSettingsComponent appSettingsComponent;
-
     private final String sechubCredentialsKey = "SECHUB_CREDENTIALS";
+    private AppSettingsComponent appSettingsComponent;
 
     // A default constructor with no arguments is required because
     // this implementation is registered as an applicationConfigurable
@@ -44,8 +43,7 @@ final class AppSettingsConfigurable implements Configurable {
 
     @Override
     public boolean isModified() {
-        AppSettings.State state =
-                Objects.requireNonNull(AppSettings.getInstance().getState());
+        AppSettings.State state = Objects.requireNonNull(AppSettings.getInstance().getState());
         String currentPassword = "";
         String userName = "";
 
@@ -62,8 +60,7 @@ final class AppSettingsConfigurable implements Configurable {
 
     @Override
     public void apply() {
-        AppSettings.State state =
-                Objects.requireNonNull(AppSettings.getInstance().getState());
+        AppSettings.State state = Objects.requireNonNull(AppSettings.getInstance().getState());
         state.serverURL = appSettingsComponent.getServerUrlText();
         // Updating the server URL in the SecHubServerPanel
         SecHubServerPanel secHubServerPanel = SecHubServerPanel.getInstance();
@@ -77,8 +74,7 @@ final class AppSettingsConfigurable implements Configurable {
 
     @Override
     public void reset() {
-        AppSettings.State state =
-                Objects.requireNonNull(AppSettings.getInstance().getState());
+        AppSettings.State state = Objects.requireNonNull(AppSettings.getInstance().getState());
         appSettingsComponent.setServerUrlText(state.serverURL);
 
         Credentials credentials = retrieveCredentials();
@@ -106,8 +102,6 @@ final class AppSettingsConfigurable implements Configurable {
     }
 
     private CredentialAttributes createCredentialAttributes() {
-        return new CredentialAttributes(
-                CredentialAttributesKt.generateServiceName("SecHub", sechubCredentialsKey)
-        );
+        return new CredentialAttributes(CredentialAttributesKt.generateServiceName("SecHub", sechubCredentialsKey));
     }
 }

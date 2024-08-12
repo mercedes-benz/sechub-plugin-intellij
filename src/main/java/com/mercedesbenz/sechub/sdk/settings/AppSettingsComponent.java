@@ -20,8 +20,7 @@ public class AppSettingsComponent {
                 .addLabeledComponent(new JBLabel("Server URL:"), serverUrlText, 1, false)
                 .addLabeledComponent(new JBLabel("User name:"), userNameText, 1, false)
                 .addLabeledComponent(new JBLabel("API token:"), apiTokenPassword, 1, false)
-                .addComponentFillVertically(new JPanel(), 0)
-                .getPanel();
+                .addComponentFillVertically(new JPanel(), 0).getPanel();
     }
 
     public JPanel getPanel() {
@@ -37,22 +36,22 @@ public class AppSettingsComponent {
         return userNameText.getText();
     }
 
+    public void setUserNameText(@NotNull String newText) {
+        userNameText.setText(newText);
+    }
+
     @NotNull
     public String getServerUrlText() {
         return serverUrlText.getText();
     }
 
+    public void setServerUrlText(@NotNull String newText) {
+        serverUrlText.setText(newText);
+    }
+
     @NotNull
     public String getApiTokenPassword() {
         return String.valueOf(apiTokenPassword.getPassword());
-    }
-
-    public void setUserNameText(@NotNull String newText) {
-        userNameText.setText(newText);
-    }
-
-    public void setServerUrlText(@NotNull String newText) {
-        serverUrlText.setText(newText);
     }
 
     public void setApiTokenPassword(@NotNull String newText) {
