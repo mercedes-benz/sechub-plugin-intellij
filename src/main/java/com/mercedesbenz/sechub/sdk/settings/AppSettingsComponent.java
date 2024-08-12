@@ -1,4 +1,4 @@
-package org.intellij.sdk.settings;
+package com.mercedesbenz.sechub.sdk.settings;
 
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
@@ -7,11 +7,7 @@ import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.util.Arrays;
 
-/**
- * Supports creating and managing a {@link JPanel} for the Settings Dialog.
- */
 public class AppSettingsComponent {
 
     private final JPanel mainPanel;

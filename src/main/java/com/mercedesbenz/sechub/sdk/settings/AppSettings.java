@@ -1,4 +1,4 @@
-package org.intellij.sdk.settings;
+package com.mercedesbenz.sechub.sdk.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
 @State(
-        name = "org.intellij.sdk.settings.AppSettings",
+        name = "com.mercedesbenz.sechub.sdk.settings.AppSettings",
         storages = @Storage("SdkSettingsPlugin.xml")
 )
 public final class AppSettings

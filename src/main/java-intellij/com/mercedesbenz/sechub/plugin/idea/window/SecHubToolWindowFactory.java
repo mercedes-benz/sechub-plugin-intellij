@@ -23,6 +23,9 @@ public class SecHubToolWindowFactory implements ToolWindowFactory, DumbAware {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
 
+        SecHubServerPanel serverPanel = new SecHubServerPanel();
+        SecHubServerPanel.registerInstance(serverPanel);
+
         SecHubReportPanel reportPanel = new SecHubReportPanel(toolWindow);
         SecHubReportPanel.registerInstance(reportPanel);
 
@@ -35,7 +38,8 @@ public class SecHubToolWindowFactory implements ToolWindowFactory, DumbAware {
       //  toolbarActions.add(importAction);
        // toolbarActions.add(resetReportData);
 
-        addToolWindowTab(toolWindow, reportPanel, toolbar);
+        addToolWindowTab(toolWindow, reportPanel, toolbar, "Report");
+        addToolWindowTab(toolWindow, serverPanel, toolbar, "Server");
 
         List<AnAction> titleActions = new ArrayList<>();
         titleActions.add(importAction);
@@ -43,15 +47,15 @@ public class SecHubToolWindowFactory implements ToolWindowFactory, DumbAware {
         toolWindow.setTitleActions(titleActions);
     }
 
-    private static void addToolWindowTab(@NotNull ToolWindow toolWindow, SecHubReportPanel reportPanel, ActionToolbar toolbar) {
+    private static void addToolWindowTab(@NotNull ToolWindow toolWindow, SecHubPanel panel, ActionToolbar toolbar, String name) {
         ContentFactory contentFactory = ContentFactory.getInstance();
         SimpleToolWindowPanel toolWindowPanel = new SimpleToolWindowPanel(false,false);
-        toolWindowPanel.add(reportPanel.getContent());
+        toolWindowPanel.add(panel.getContent());
 
         toolbar.setTargetComponent(toolWindowPanel);
         toolWindowPanel.setToolbar(toolbar.getComponent());
 
-        Content content = contentFactory.createContent(toolWindowPanel, "Report", false);
+        Content content = contentFactory.createContent(toolWindowPanel, name, false);
         toolWindow.getContentManager().addContent(content);
     }
 }

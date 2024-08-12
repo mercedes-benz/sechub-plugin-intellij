@@ -18,10 +18,11 @@
         <!-- Add your extensions here -->
         <toolWindow id="SecHub" icon="/icons/toolWindowSecHub.svg" factoryClass="com.mercedesbenz.sechub.plugin.idea.window.SecHubToolWindowFactory" anchor="left"/>
 
-        <applicationService serviceImplementation="org.intellij.sdk.settings.AppSettings"/>
+        <!-- Extension for storing server credentials (package need to be in main/java) -->
+        <applicationService serviceImplementation="com.mercedesbenz.sechub.sdk.settings.AppSettings"/>
 
-        <applicationConfigurable parentId="tools" instance="org.intellij.sdk.settings.AppSettingsConfigurable"
-                                 id="org.intellij.sdk.settings.AppSettingsConfigurable"
+        <applicationConfigurable parentId="tools" instance="com.mercedesbenz.sechub.sdk.settings.AppSettingsConfigurable"
+                                 id="com.mercedesbenz.sechub.sdk.settings.AppSettingsConfigurable"
                                  displayName="SecHub"/>
     </extensions>
 

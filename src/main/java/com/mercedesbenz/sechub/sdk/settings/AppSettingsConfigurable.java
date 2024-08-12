@@ -1,17 +1,18 @@
-package org.intellij.sdk.settings;
+package com.mercedesbenz.sechub.sdk.settings;
 
 import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.options.Configurable;
+import com.mercedesbenz.sechub.plugin.idea.window.SecHubServerPanel;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.Objects;
 
-/**
+/*
  * Provides controller functionality for application settings.
  */
 final class AppSettingsConfigurable implements Configurable {
@@ -19,7 +20,6 @@ final class AppSettingsConfigurable implements Configurable {
     private AppSettingsComponent appSettingsComponent;
 
     private final String sechubCredentialsKey = "SECHUB_CREDENTIALS";
-
 
     // A default constructor with no arguments is required because
     // this implementation is registered as an applicationConfigurable
@@ -65,8 +65,11 @@ final class AppSettingsConfigurable implements Configurable {
         AppSettings.State state =
                 Objects.requireNonNull(AppSettings.getInstance().getState());
         state.serverURL = appSettingsComponent.getServerUrlText();
+        // Updating the server URL in the SecHubServerPanel
+        SecHubServerPanel secHubServerPanel = SecHubServerPanel.getInstance();
+        secHubServerPanel.update(state.serverURL);
 
-        CredentialAttributes attributes = createCredentialAttributes(sechubCredentialsKey);
+        CredentialAttributes attributes = createCredentialAttributes();
         Credentials credentials = new Credentials(appSettingsComponent.getUserNameText(), appSettingsComponent.getApiTokenPassword());
 
         PasswordSafe.getInstance().set(attributes, credentials);
@@ -97,14 +100,14 @@ final class AppSettingsConfigurable implements Configurable {
     }
 
     private Credentials retrieveCredentials() {
-        CredentialAttributes attributes = createCredentialAttributes(sechubCredentialsKey);
+        CredentialAttributes attributes = createCredentialAttributes();
         PasswordSafe passwordSafe = PasswordSafe.getInstance();
         return passwordSafe.get(attributes);
     }
 
-    private CredentialAttributes createCredentialAttributes(String key) {
+    private CredentialAttributes createCredentialAttributes() {
         return new CredentialAttributes(
-                CredentialAttributesKt.generateServiceName("SecHub", key)
+                CredentialAttributesKt.generateServiceName("SecHub", sechubCredentialsKey)
         );
     }
 }
