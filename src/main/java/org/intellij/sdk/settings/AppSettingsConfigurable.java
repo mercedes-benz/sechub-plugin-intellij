@@ -1,9 +1,10 @@
 package org.intellij.sdk.settings;
 
+import com.intellij.credentialStore.CredentialAttributes;
+import com.intellij.credentialStore.CredentialAttributesKt;
+import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
-import com.intellij.ide.passwordSafe.PasswordSafeException;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,13 +18,16 @@ final class AppSettingsConfigurable implements Configurable {
 
     private AppSettingsComponent appSettingsComponent;
 
+    private final String sechubCredentialsKey = "SECHUB_CREDENTIALS";
+
+
     // A default constructor with no arguments is required because
     // this implementation is registered as an applicationConfigurable
 
     @Nls(capitalization = Nls.Capitalization.Title)
     @Override
     public String getDisplayName() {
-        return "SecHub Configuration";
+        return "SecHub";
     }
 
     @Override
@@ -43,13 +47,16 @@ final class AppSettingsConfigurable implements Configurable {
         AppSettings.State state =
                 Objects.requireNonNull(AppSettings.getInstance().getState());
         String currentPassword = "";
-        try {
-            currentPassword = PasswordSafe.getInstance().getPassword(null, AppSettings.class, "PASSWORD_KEY");
-        } catch (PasswordSafeException e) {
-            e.printStackTrace();
+        String userName = "";
+
+        Credentials credentials = retrieveCredentials();
+        if (credentials != null) {
+            currentPassword = credentials.getPasswordAsString();
+            userName = credentials.getUserName();
         }
-        return !appSettingsComponent.getUserNameText().equals(state.userName) ||
-                appSettingsComponent.getApiTokenText().equals(StringUtil.notNullize(currentPassword)) ||
+
+        return !appSettingsComponent.getUserNameText().equals(userName) ||
+                appSettingsComponent.getApiTokenPassword().equals(currentPassword) ||
                 appSettingsComponent.getServerUrlText().equals(state.serverURL);
     }
 
@@ -57,29 +64,31 @@ final class AppSettingsConfigurable implements Configurable {
     public void apply() {
         AppSettings.State state =
                 Objects.requireNonNull(AppSettings.getInstance().getState());
-        state.userName = appSettingsComponent.getUserNameText();
         state.serverURL = appSettingsComponent.getServerUrlText();
-        try {
-            PasswordSafe.getInstance().storePassword(null, AppSettings.class, "PASSWORD_KEY", appSettingsComponent.getApiTokenText());
-        } catch (PasswordSafeException e) {
-            e.printStackTrace();
-        }
+
+        CredentialAttributes attributes = createCredentialAttributes(sechubCredentialsKey);
+        Credentials credentials = new Credentials(appSettingsComponent.getUserNameText(), appSettingsComponent.getApiTokenPassword());
+
+        PasswordSafe.getInstance().set(attributes, credentials);
     }
 
     @Override
     public void reset() {
         AppSettings.State state =
                 Objects.requireNonNull(AppSettings.getInstance().getState());
-        appSettingsComponent.setUserNameText(state.userName);
         appSettingsComponent.setServerUrlText(state.serverURL);
-        String currentPassword = "";
-        try {
-            currentPassword = PasswordSafe.getInstance().getPassword(null, AppSettings.class, "PASSWORD_KEY");
-        } catch (PasswordSafeException e) {
-            e.printStackTrace();
-        }
-        appSettingsComponent.setApiTokenText(StringUtil.notNullize(currentPassword));
 
+        Credentials credentials = retrieveCredentials();
+
+        if (credentials != null) {
+            String password = credentials.getPasswordAsString();
+            String userName = credentials.getUserName();
+
+            assert userName != null;
+            appSettingsComponent.setUserNameText(userName);
+            assert password != null;
+            appSettingsComponent.setApiTokenPassword(password);
+        }
     }
 
     @Override
@@ -87,4 +96,15 @@ final class AppSettingsConfigurable implements Configurable {
         appSettingsComponent = null;
     }
 
+    private Credentials retrieveCredentials() {
+        CredentialAttributes attributes = createCredentialAttributes(sechubCredentialsKey);
+        PasswordSafe passwordSafe = PasswordSafe.getInstance();
+        return passwordSafe.get(attributes);
+    }
+
+    private CredentialAttributes createCredentialAttributes(String key) {
+        return new CredentialAttributes(
+                CredentialAttributesKt.generateServiceName("SecHub", key)
+        );
+    }
 }

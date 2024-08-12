@@ -1,6 +1,5 @@
 package org.intellij.sdk.settings;
 
-import com.intellij.ui.components.JBCheckBox;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
@@ -8,6 +7,7 @@ import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.util.Arrays;
 
 /**
  * Supports creating and managing a {@link JPanel} for the Settings Dialog.
@@ -17,13 +17,13 @@ public class AppSettingsComponent {
     private final JPanel mainPanel;
     private final JBTextField userNameText = new JBTextField();
     private final JBTextField serverUrlText = new JBTextField();
-    private final JBPasswordField apiTokenText = new JBPasswordField();
+    private final JBPasswordField apiTokenPassword = new JBPasswordField();
 
     public AppSettingsComponent() {
         mainPanel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(new JBLabel("Server URL:"), serverUrlText, 1, false)
                 .addLabeledComponent(new JBLabel("User name:"), userNameText, 1, false)
-                .addLabeledComponent(new JBLabel("API token:"), apiTokenText, 1, false)
+                .addLabeledComponent(new JBLabel("API token:"), apiTokenPassword, 1, false)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
     }
@@ -47,8 +47,8 @@ public class AppSettingsComponent {
     }
 
     @NotNull
-    public String getApiTokenText() {
-        return apiTokenText.getText();
+    public String getApiTokenPassword() {
+        return String.valueOf(apiTokenPassword.getPassword());
     }
 
     public void setUserNameText(@NotNull String newText) {
@@ -59,8 +59,8 @@ public class AppSettingsComponent {
         serverUrlText.setText(newText);
     }
 
-    public void setApiTokenText(@NotNull String newText) {
-        apiTokenText.setText(newText);
+    public void setApiTokenPassword(@NotNull String newText) {
+        apiTokenPassword.setText(newText);
     }
 
 }

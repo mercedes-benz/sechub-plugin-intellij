@@ -18,11 +18,6 @@ public final class AppSettings
 
         @NonNls
         public String serverURL = "";
-        @NonNls
-        public String userName = "";
-        @NonNls
-        public String apiToken = "";
-
     }
 
     private State state = new State();

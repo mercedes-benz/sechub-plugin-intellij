@@ -22,7 +22,7 @@
 
         <applicationConfigurable parentId="tools" instance="org.intellij.sdk.settings.AppSettingsConfigurable"
                                  id="org.intellij.sdk.settings.AppSettingsConfigurable"
-                                 displayName="SecHub Configuration"/>
+                                 displayName="SecHub"/>
     </extensions>
 
     <actions>
