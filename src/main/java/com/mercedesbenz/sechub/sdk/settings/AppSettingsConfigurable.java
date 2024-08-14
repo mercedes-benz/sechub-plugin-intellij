@@ -1,10 +1,10 @@
 package com.mercedesbenz.sechub.sdk.settings;
 
 import com.intellij.credentialStore.CredentialAttributes;
-import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.options.Configurable;
+import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccess;
 import com.mercedesbenz.sechub.plugin.idea.window.SecHubServerPanel;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -17,8 +17,8 @@ import java.util.Objects;
  */
 final class AppSettingsConfigurable implements Configurable {
 
-    private final String sechubCredentialsKey = "SECHUB_CREDENTIALS";
     private AppSettingsComponent appSettingsComponent;
+    private AppSettingsCredentialsSupport appSettingsCredentialsSupport;
 
     // A default constructor with no arguments is required because
     // this implementation is registered as an applicationConfigurable
@@ -38,6 +38,7 @@ final class AppSettingsConfigurable implements Configurable {
     @Override
     public JComponent createComponent() {
         appSettingsComponent = new AppSettingsComponent();
+        appSettingsCredentialsSupport = new AppSettingsCredentialsSupport();
         return appSettingsComponent.getPanel();
     }
 
@@ -47,7 +48,7 @@ final class AppSettingsConfigurable implements Configurable {
         String currentPassword = "";
         String userName = "";
 
-        Credentials credentials = retrieveCredentials();
+        Credentials credentials = appSettingsCredentialsSupport.retrieveCredentials();
         if (credentials != null) {
             currentPassword = credentials.getPasswordAsString();
             userName = credentials.getUserName();
@@ -62,14 +63,20 @@ final class AppSettingsConfigurable implements Configurable {
     public void apply() {
         AppSettings.State state = Objects.requireNonNull(AppSettings.getInstance().getState());
         state.serverURL = appSettingsComponent.getServerUrlText();
-        // Updating the server URL in the SecHubServerPanel
-        SecHubServerPanel secHubServerPanel = SecHubServerPanel.getInstance();
-        secHubServerPanel.update(state.serverURL);
 
-        CredentialAttributes attributes = createCredentialAttributes();
+        CredentialAttributes attributes = appSettingsCredentialsSupport.createCredentialAttributes();
         Credentials credentials = new Credentials(appSettingsComponent.getUserNameText(), appSettingsComponent.getApiTokenPassword());
 
         PasswordSafe.getInstance().set(attributes, credentials);
+
+        // Updating the SecHubAccess object with the new credentials and server URL
+        updateSecHubAccess(state);
+
+        // Updating the server URL in the SecHubServerPanel and check alive status
+        SecHubServerPanel secHubServerPanel = SecHubServerPanel.getInstance();
+        SecHubAccess secHubAccess = SecHubAccess.getInstance();
+        secHubServerPanel.update(state.serverURL, secHubAccess.isSecHubServerAlive());
+
     }
 
     @Override
@@ -77,7 +84,7 @@ final class AppSettingsConfigurable implements Configurable {
         AppSettings.State state = Objects.requireNonNull(AppSettings.getInstance().getState());
         appSettingsComponent.setServerUrlText(state.serverURL);
 
-        Credentials credentials = retrieveCredentials();
+        Credentials credentials = appSettingsCredentialsSupport.retrieveCredentials();
 
         if (credentials != null) {
             String password = credentials.getPasswordAsString();
@@ -95,13 +102,13 @@ final class AppSettingsConfigurable implements Configurable {
         appSettingsComponent = null;
     }
 
-    private Credentials retrieveCredentials() {
-        CredentialAttributes attributes = createCredentialAttributes();
-        PasswordSafe passwordSafe = PasswordSafe.getInstance();
-        return passwordSafe.get(attributes);
-    }
+    private void updateSecHubAccess(AppSettings.State state) {
+        SecHubAccess secHubAccess = SecHubAccess.getInstance();
+        secHubAccess.setSecHubServerUrl(state.serverURL);
+        secHubAccess.setUserId(appSettingsComponent.getUserNameText());
+        secHubAccess.setApiToken(appSettingsComponent.getApiTokenPassword());
+        secHubAccess.setTrustAllCertificates(true);
 
-    private CredentialAttributes createCredentialAttributes() {
-        return new CredentialAttributes(CredentialAttributesKt.generateServiceName("SecHub", sechubCredentialsKey));
+        secHubAccess.initSecHubClient();
     }
 }
