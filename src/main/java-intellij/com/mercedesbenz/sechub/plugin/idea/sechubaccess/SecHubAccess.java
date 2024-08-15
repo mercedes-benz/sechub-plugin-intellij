@@ -49,7 +49,12 @@ public class SecHubAccess {
 
         URI serverUri = URI.create(secHubServerUrl);
 
-        this.client = DefaultSecHubClient.builder().server(serverUri).user(userId).apiToken(apiToken).trustAll(trustAllCertificates).build();
+        this.client = DefaultSecHubClient.builder()
+                .server(serverUri)
+                .user(userId)
+                .apiToken(apiToken)
+                .trustAll(trustAllCertificates)
+                .build();
     }
 
     public boolean isSecHubServerAlive() {

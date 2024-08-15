@@ -1,13 +1,13 @@
 package com.mercedesbenz.sechub.plugin.idea.window;
 
-import com.intellij.credentialStore.Credentials;
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextField;
 import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccess;
+import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccessSupport;
 import com.mercedesbenz.sechub.sdk.settings.AppSettings;
-import com.mercedesbenz.sechub.sdk.settings.AppSettingsCredentialsSupport;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -17,17 +17,27 @@ import java.util.Objects;
 public class SecHubServerPanel implements SecHubPanel {
 
     private static final Logger LOG = Logger.getInstance(SecHubServerPanel.class);
+    public static final String SERVER_URL_NOT_CONFIGURED = "Server URL not configured";
+    public static final String BUTTON_TEXT = "check connection";
+    public static final String SERVER_URL_LABEL = "Server URL: ";
+    public static final String SERVER_CONNECTION_LABEL = "Server connection: ";
     private static SecHubServerPanel INSTANCE;
+
     private JPanel contentPanel;
     private JBTextField serverUrlText;
-    private JBTextField serverActiveText;
+    private final JLabel serverActiveLabel = new JBLabel();
+    private final @NotNull Icon serverActiveUnchecked = AllIcons.Actions.Refresh;
+    private final @NotNull Icon serverActiveTrue = AllIcons.General.InspectionsOK;
+    private final @NotNull Icon serverActiveFalse = AllIcons.Ide.ErrorPoint;
+    private final JButton serverActiveButton = new JButton(BUTTON_TEXT);
+
 
     public SecHubServerPanel() {
         createComponents();
     }
 
     public static void registerInstance(SecHubServerPanel secHubToolWindow) {
-        LOG.info("register tool windows instance:" + secHubToolWindow);
+        LOG.info("Register tool windows instance:" + secHubToolWindow);
         INSTANCE = secHubToolWindow;
     }
 
@@ -42,14 +52,14 @@ public class SecHubServerPanel implements SecHubPanel {
 
     public void update(String serverURL, boolean isActive) {
         if (serverURL.isBlank()) {
-            serverURL = "Server URL not configured";
+            serverURL = SERVER_URL_NOT_CONFIGURED;
         }
         serverUrlText.setText(serverURL);
 
         if (isActive) {
-            serverActiveText.setText("Connection alive");
+            serverActiveLabel.setIcon(serverActiveTrue);
         } else {
-            serverActiveText.setText("Connection failed");
+            serverActiveLabel.setIcon(serverActiveFalse);
         }
     }
 
@@ -57,43 +67,38 @@ public class SecHubServerPanel implements SecHubPanel {
         contentPanel = new JBPanel<>();
         contentPanel.setLayout(new BorderLayout());
 
-        final JPanel content = createPanel();
+        final JPanel content = createContentPanel();
         contentPanel.add(content, BorderLayout.NORTH);
     }
 
     @NotNull
-    private JPanel createPanel() {
+    private JPanel createContentPanel() {
         JPanel content = new JPanel(new BorderLayout());
         serverUrlText = new JBTextField();
-        serverActiveText = new JBTextField();
 
         serverUrlText.setEditable(false);
         String serverURL = Objects.requireNonNull(AppSettings.getInstance().getState()).serverURL;
         if (serverURL.isBlank()) {
-            serverURL = "Server URL not configured";
+            serverURL = SERVER_URL_NOT_CONFIGURED;
         } else {
-            initSecHubAccess();
+            SecHubAccessSupport secHubAccessSupport = new SecHubAccessSupport();
+            secHubAccessSupport.setSecHubAccessComponents();
         }
         serverUrlText.setText(serverURL);
 
         JPanel serverStatePanel = new JPanel();
         serverStatePanel.setLayout(new BorderLayout());
 
-        JButton serverActiveButton = new JButton("connect");
-        serverActiveButton.addActionListener(e -> {
-            SecHubAccess secHubAccess = SecHubAccess.getInstance();
-            update(Objects.requireNonNull(AppSettings.getInstance().getState()).serverURL, secHubAccess.isSecHubServerAlive());
-        });
+        addActionListenerToButton();
 
-        serverActiveText.setEditable(false);
-        serverActiveText.setText("Server connection not checked");
-        serverStatePanel.add(serverActiveText, BorderLayout.WEST);
+        serverActiveLabel.setIcon(serverActiveUnchecked);
+        serverStatePanel.add(serverActiveLabel, BorderLayout.WEST);
         serverStatePanel.add(serverActiveButton, BorderLayout.EAST);
 
         JPanel labelPane = new JPanel();
         labelPane.setLayout(new GridLayout(0, 1));
-        labelPane.add(new JBLabel("Server URL: "));
-        labelPane.add(new JBLabel("Server connection: "));
+        labelPane.add(new JBLabel(SERVER_URL_LABEL));
+        labelPane.add(new JBLabel(SERVER_CONNECTION_LABEL));
 
         JPanel fieldPane = new JPanel();
         fieldPane.setLayout(new GridLayout(0, 1));
@@ -105,16 +110,10 @@ public class SecHubServerPanel implements SecHubPanel {
         return content;
     }
 
-    private void initSecHubAccess() {
-        AppSettingsCredentialsSupport appSettingsCredentialsSupport = new AppSettingsCredentialsSupport();
-        Credentials credentials = appSettingsCredentialsSupport.retrieveCredentials();
-        AppSettings.State state = Objects.requireNonNull(AppSettings.getInstance().getState());
-        SecHubAccess secHubAccess = SecHubAccess.getInstance();
-        secHubAccess.setSecHubServerUrl(state.serverURL);
-        secHubAccess.setUserId(credentials.getUserName());
-        secHubAccess.setApiToken(credentials.getPasswordAsString());
-        secHubAccess.setTrustAllCertificates(true);
-
-        secHubAccess.initSecHubClient();
+    private void addActionListenerToButton() {
+        serverActiveButton.addActionListener(e -> {
+            SecHubAccess secHubAccess = SecHubAccess.getInstance();
+            update(Objects.requireNonNull(AppSettings.getInstance().getState()).serverURL, secHubAccess.isSecHubServerAlive());
+        });
     }
 }

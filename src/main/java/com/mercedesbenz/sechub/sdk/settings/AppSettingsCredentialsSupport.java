@@ -15,7 +15,12 @@ public class AppSettingsCredentialsSupport {
         return passwordSafe.get(attributes);
     }
 
-    public CredentialAttributes createCredentialAttributes() {
+    public void storeCredentials(Credentials credentials) {
+        CredentialAttributes attributes = createCredentialAttributes();
+        PasswordSafe.getInstance().set(attributes, credentials);
+    }
+
+    private CredentialAttributes createCredentialAttributes() {
         return new CredentialAttributes(CredentialAttributesKt.generateServiceName("SecHub", SECHUB_CREDENTIALS_KEY));
     }
 }

@@ -1,10 +1,9 @@
 package com.mercedesbenz.sechub.sdk.settings;
 
-import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.credentialStore.Credentials;
-import com.intellij.ide.passwordSafe.PasswordSafe;
 import com.intellij.openapi.options.Configurable;
 import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccess;
+import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccessSupport;
 import com.mercedesbenz.sechub.plugin.idea.window.SecHubServerPanel;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
@@ -64,20 +63,13 @@ final class AppSettingsConfigurable implements Configurable {
         AppSettings.State state = Objects.requireNonNull(AppSettings.getInstance().getState());
         state.serverURL = appSettingsComponent.getServerUrlText();
 
-        CredentialAttributes attributes = appSettingsCredentialsSupport.createCredentialAttributes();
         Credentials credentials = new Credentials(appSettingsComponent.getUserNameText(), appSettingsComponent.getApiTokenPassword());
+        appSettingsCredentialsSupport.storeCredentials(credentials);
 
-        PasswordSafe.getInstance().set(attributes, credentials);
-
-        // Updating the SecHubAccess object with the new credentials and server URL
-        updateSecHubAccess(state);
-
-        // Updating the server URL in the SecHubServerPanel and check alive status
-        SecHubServerPanel secHubServerPanel = SecHubServerPanel.getInstance();
-        SecHubAccess secHubAccess = SecHubAccess.getInstance();
-        secHubServerPanel.update(state.serverURL, secHubAccess.isSecHubServerAlive());
-
+        updateComponents(state);
     }
+
+
 
     @Override
     public void reset() {
@@ -102,13 +94,14 @@ final class AppSettingsConfigurable implements Configurable {
         appSettingsComponent = null;
     }
 
-    private void updateSecHubAccess(AppSettings.State state) {
-        SecHubAccess secHubAccess = SecHubAccess.getInstance();
-        secHubAccess.setSecHubServerUrl(state.serverURL);
-        secHubAccess.setUserId(appSettingsComponent.getUserNameText());
-        secHubAccess.setApiToken(appSettingsComponent.getApiTokenPassword());
-        secHubAccess.setTrustAllCertificates(true);
+    private static void updateComponents(AppSettings.State state) {
+        // Updating the SecHubAccess object with the new credentials and server URL
+        SecHubAccessSupport secHubAccessSupport = new SecHubAccessSupport();
+        secHubAccessSupport.setSecHubAccessComponents();
 
-        secHubAccess.initSecHubClient();
+        // Updating the server URL in the SecHubServerPanel and check alive status
+        SecHubServerPanel secHubServerPanel = SecHubServerPanel.getInstance();
+        SecHubAccess secHubAccess = SecHubAccess.getInstance();
+        secHubServerPanel.update(state.serverURL, secHubAccess.isSecHubServerAlive());
     }
 }
