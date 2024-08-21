@@ -1,5 +1,6 @@
 package com.mercedesbenz.sechub.sdk.settings;
 
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPasswordField;
 import com.intellij.ui.components.JBTextField;
@@ -7,6 +8,9 @@ import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.awt.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class AppSettingsComponent {
 
@@ -42,6 +46,7 @@ public class AppSettingsComponent {
 
     @NotNull
     public String getServerUrlText() {
+        assertServerURIValid();
         return serverUrlText.getText();
     }
 
@@ -58,4 +63,12 @@ public class AppSettingsComponent {
         apiTokenPassword.setText(newText);
     }
 
+    private void assertServerURIValid() {
+        try {
+            new URI(serverUrlText.getText());
+            serverUrlText.setBackground(JBColor.background());
+        } catch (URISyntaxException e) {
+            serverUrlText.setBackground(JBColor.RED);
+        }
+    }
 }

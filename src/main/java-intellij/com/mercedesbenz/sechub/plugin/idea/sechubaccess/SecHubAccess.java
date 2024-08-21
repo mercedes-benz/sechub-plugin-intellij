@@ -12,10 +12,6 @@ public class SecHubAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(SecHubAccess.class);
     private static SecHubAccess INSTANCE;
-    private String secHubServerUrl;
-    private boolean trustAllCertificates;
-    private String userId;
-    private String apiToken;
     private SecHubClient client;
 
     private SecHubAccess() {
@@ -29,37 +25,13 @@ public class SecHubAccess {
         return INSTANCE;
     }
 
-    public void setSecHubServerUrl(String secHubServerUrl) {
-        this.secHubServerUrl = secHubServerUrl;
-    }
-
-    public void setTrustAllCertificates(boolean trustAllCertificates) {
-        this.trustAllCertificates = trustAllCertificates;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public void setApiToken(String apiToken) {
-        this.apiToken = apiToken;
-    }
-
-    public void initSecHubClient() {
-
-        URI serverUri = URI.create(secHubServerUrl);
-
-        this.client = DefaultSecHubClient.builder()
-                .server(serverUri)
-                .user(userId)
-                .apiToken(apiToken)
-                .trustAll(trustAllCertificates)
-                .build();
+    public void setClient(SecHubClient client) {
+        this.client = client;
     }
 
     public boolean isSecHubServerAlive() {
         if (client == null) {
-            LOG.error("SecHub client is not initialized");
+            LOG.debug("SecHub client is not initialized");
             return false;
         }
         try {

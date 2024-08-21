@@ -3,12 +3,15 @@ package com.mercedesbenz.sechub.sdk.settings;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.openapi.options.Configurable;
 import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccess;
-import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccessSupport;
+import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccessFactory;
 import com.mercedesbenz.sechub.plugin.idea.window.SecHubServerPanel;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Objects;
 
 /*
@@ -45,23 +48,29 @@ final class AppSettingsConfigurable implements Configurable {
     public boolean isModified() {
         AppSettings.State state = Objects.requireNonNull(AppSettings.getInstance().getState());
         String currentPassword = "";
-        String userName = "";
+        String currentUserName = "";
 
         Credentials credentials = appSettingsCredentialsSupport.retrieveCredentials();
         if (credentials != null) {
             currentPassword = credentials.getPasswordAsString();
-            userName = credentials.getUserName();
+            currentUserName = credentials.getUserName();
         }
 
-        return !appSettingsComponent.getUserNameText().equals(userName) ||
-                appSettingsComponent.getApiTokenPassword().equals(currentPassword) ||
-                appSettingsComponent.getServerUrlText().equals(state.serverURL);
+        return !appSettingsComponent.getUserNameText().equals(currentUserName) ||
+                !appSettingsComponent.getApiTokenPassword().equals(currentPassword) ||
+                !appSettingsComponent.getServerUrlText().equals(state.serverURL);
     }
 
     @Override
     public void apply() {
         AppSettings.State state = Objects.requireNonNull(AppSettings.getInstance().getState());
-        state.serverURL = appSettingsComponent.getServerUrlText();
+
+        String serverUrl = appSettingsComponent.getServerUrlText();
+        if (!serverUrl.isBlank() && !serverUrl.startsWith("http")) {
+            /* It is necessary to apply http protocol since the sechubClient needs it even when the URI is valid */
+            serverUrl = "https://" + serverUrl;
+        }
+        state.serverURL = serverUrl;
 
         Credentials credentials = new Credentials(appSettingsComponent.getUserNameText(), appSettingsComponent.getApiTokenPassword());
         appSettingsCredentialsSupport.storeCredentials(credentials);
@@ -78,13 +87,21 @@ final class AppSettingsConfigurable implements Configurable {
 
         Credentials credentials = appSettingsCredentialsSupport.retrieveCredentials();
 
+        displayCredentialsInSettings(credentials);
+    }
+
+    private void displayCredentialsInSettings(Credentials credentials) {
         if (credentials != null) {
             String password = credentials.getPasswordAsString();
             String userName = credentials.getUserName();
 
-            assert userName != null;
+            if(userName == null){
+                userName = "";
+            }
+            if (password == null) {
+                password = "";
+            }
             appSettingsComponent.setUserNameText(userName);
-            assert password != null;
             appSettingsComponent.setApiTokenPassword(password);
         }
     }
@@ -96,12 +113,11 @@ final class AppSettingsConfigurable implements Configurable {
 
     private static void updateComponents(AppSettings.State state) {
         // Updating the SecHubAccess object with the new credentials and server URL
-        SecHubAccessSupport secHubAccessSupport = new SecHubAccessSupport();
-        secHubAccessSupport.setSecHubAccessComponents();
+        SecHubAccessFactory secHubAccessFactory = new SecHubAccessFactory();
+        SecHubAccess secHubAccess = secHubAccessFactory.create();
 
         // Updating the server URL in the SecHubServerPanel and check alive status
         SecHubServerPanel secHubServerPanel = SecHubServerPanel.getInstance();
-        SecHubAccess secHubAccess = SecHubAccess.getInstance();
         secHubServerPanel.update(state.serverURL, secHubAccess.isSecHubServerAlive());
     }
 }

@@ -6,7 +6,7 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextField;
 import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccess;
-import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccessSupport;
+import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccessFactory;
 import com.mercedesbenz.sechub.sdk.settings.AppSettings;
 import org.jetbrains.annotations.NotNull;
 
@@ -81,8 +81,8 @@ public class SecHubServerPanel implements SecHubPanel {
         if (serverURL.isBlank()) {
             serverURL = SERVER_URL_NOT_CONFIGURED;
         } else {
-            SecHubAccessSupport secHubAccessSupport = new SecHubAccessSupport();
-            secHubAccessSupport.setSecHubAccessComponents();
+            SecHubAccessFactory secHubAccessFactory = new SecHubAccessFactory();
+            secHubAccessFactory.create();
         }
         serverUrlText.setText(serverURL);
 
