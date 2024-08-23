@@ -31,17 +31,14 @@ public class SecHubAccess {
 
     private void initSecHubClient(String secHubServerUrl, String userId, String apiToken, boolean trustAllCertificates) {
 
-        SecHubClient client = null;
-
         if (isInputMissingOrEmpty(secHubServerUrl, userId, apiToken)) {
-            this.client = client;
             return;
         }
         try {
             URI serverUri = URI.create(secHubServerUrl);
 
             /* @formatter:off */
-            client = DefaultSecHubClient.builder()
+            this.client = DefaultSecHubClient.builder()
                     .server(serverUri)
                     .user(userId)
                     .apiToken(apiToken)
@@ -49,8 +46,8 @@ public class SecHubAccess {
                     .build();
             /* @formatter:on */
 
-        } finally {
-            this.client = client;
+        } catch (IllegalArgumentException e) {
+            LOG.error("Failed to initialize SecHub client", e);
         }
     }
 
