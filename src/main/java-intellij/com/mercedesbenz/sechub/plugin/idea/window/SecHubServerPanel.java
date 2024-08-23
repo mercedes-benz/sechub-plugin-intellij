@@ -7,7 +7,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBTextField;
 import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccess;
 import com.mercedesbenz.sechub.plugin.idea.sechubaccess.SecHubAccessFactory;
-import com.mercedesbenz.sechub.sdk.settings.AppSettings;
+import com.mercedesbenz.sechub.settings.SechubSettings;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -77,12 +77,9 @@ public class SecHubServerPanel implements SecHubPanel {
         serverUrlText = new JBTextField();
 
         serverUrlText.setEditable(false);
-        String serverURL = Objects.requireNonNull(AppSettings.getInstance().getState()).serverURL;
+        String serverURL = Objects.requireNonNull(SechubSettings.getInstance().getState()).serverURL;
         if (serverURL.isBlank()) {
             serverURL = SERVER_URL_NOT_CONFIGURED;
-        } else {
-            SecHubAccessFactory secHubAccessFactory = new SecHubAccessFactory();
-            secHubAccessFactory.create();
         }
         serverUrlText.setText(serverURL);
 
@@ -112,8 +109,8 @@ public class SecHubServerPanel implements SecHubPanel {
 
     private void addActionListenerToButton() {
         serverActiveButton.addActionListener(e -> {
-            SecHubAccess secHubAccess = SecHubAccess.getInstance();
-            update(Objects.requireNonNull(AppSettings.getInstance().getState()).serverURL, secHubAccess.isSecHubServerAlive());
+            SecHubAccess secHubAccess = SecHubAccessFactory.create();
+            update(Objects.requireNonNull(SechubSettings.getInstance().getState()).serverURL, secHubAccess.isSecHubServerAlive());
         });
     }
 }

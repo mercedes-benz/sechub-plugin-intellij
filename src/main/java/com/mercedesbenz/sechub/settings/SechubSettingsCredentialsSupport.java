@@ -1,11 +1,11 @@
-package com.mercedesbenz.sechub.sdk.settings;
+package com.mercedesbenz.sechub.settings;
 
 import com.intellij.credentialStore.CredentialAttributes;
 import com.intellij.credentialStore.CredentialAttributesKt;
 import com.intellij.credentialStore.Credentials;
 import com.intellij.ide.passwordSafe.PasswordSafe;
 
-public class AppSettingsCredentialsSupport {
+public class SechubSettingsCredentialsSupport {
 
     private final String SECHUB_CREDENTIALS_KEY = "SECHUB_CREDENTIALS_KEY";
 

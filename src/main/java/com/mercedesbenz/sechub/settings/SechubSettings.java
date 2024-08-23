@@ -1,4 +1,4 @@
-package com.mercedesbenz.sechub.sdk.settings;
+package com.mercedesbenz.sechub.settings;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
@@ -7,13 +7,13 @@ import com.intellij.openapi.components.Storage;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
-@State(name = "com.mercedesbenz.sechub.sdk.settings.AppSettings", storages = @Storage("SdkSettingsPlugin.xml"))
-public final class AppSettings implements PersistentStateComponent<AppSettings.State> {
+@State(name = "com.mercedesbenz.sechub.settings.SechubSettings", storages = @Storage("SdkSettingsPlugin.xml"))
+public final class SechubSettings implements PersistentStateComponent<SechubSettings.State> {
 
     private State state = new State();
 
-    public static AppSettings getInstance() {
-        return ApplicationManager.getApplication().getService(AppSettings.class);
+    public static SechubSettings getInstance() {
+        return ApplicationManager.getApplication().getService(SechubSettings.class);
     }
 
     @Override

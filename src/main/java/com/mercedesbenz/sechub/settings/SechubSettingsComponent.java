@@ -1,4 +1,4 @@
-package com.mercedesbenz.sechub.sdk.settings;
+package com.mercedesbenz.sechub.settings;
 
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
@@ -8,18 +8,17 @@ import com.intellij.util.ui.FormBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class AppSettingsComponent {
+public class SechubSettingsComponent {
 
     private final JPanel mainPanel;
     private final JBTextField userNameText = new JBTextField();
     private final JBTextField serverUrlText = new JBTextField();
     private final JBPasswordField apiTokenPassword = new JBPasswordField();
 
-    public AppSettingsComponent() {
+    public SechubSettingsComponent() {
         mainPanel = FormBuilder.createFormBuilder()
                 .addLabeledComponent(new JBLabel("Server URL:"), serverUrlText, 1, false)
                 .addLabeledComponent(new JBLabel("User name:"), userNameText, 1, false)
@@ -64,8 +63,13 @@ public class AppSettingsComponent {
     }
 
     private void assertServerURIValid() {
+        String serverUrl = serverUrlText.getText();
+        if (serverUrl.isBlank()) {
+            serverUrlText.setBackground(JBColor.background());
+            return;
+        }
         try {
-            new URI(serverUrlText.getText());
+            new URI(serverUrl);
             serverUrlText.setBackground(JBColor.background());
         } catch (URISyntaxException e) {
             serverUrlText.setBackground(JBColor.RED);

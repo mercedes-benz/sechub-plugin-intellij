@@ -11,22 +11,9 @@ import java.net.URI;
 public class SecHubAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(SecHubAccess.class);
-    private static SecHubAccess INSTANCE;
     private SecHubClient client;
-
-    private SecHubAccess() {
-    }
-
-    public static SecHubAccess getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new SecHubAccess();
-        }
-
-        return INSTANCE;
-    }
-
-    public void setClient(SecHubClient client) {
-        this.client = client;
+    public SecHubAccess(String secHubServerUrl, String userId, String apiToken, boolean trustAllCertificates) {
+        initSecHubClient(secHubServerUrl, userId, apiToken, trustAllCertificates);
     }
 
     public boolean isSecHubServerAlive() {
@@ -39,5 +26,34 @@ public class SecHubAccess {
         } catch (SecHubClientException e) {
             return false;
         }
+    }
+
+    private void initSecHubClient(String secHubServerUrl, String userId, String apiToken, boolean trustAllCertificates) {
+
+        SecHubClient client = null;
+
+        if (isInputMissingOrEmpty(secHubServerUrl, userId, apiToken)) {
+            this.client = client;
+            return;
+        }
+        try {
+            URI serverUri = URI.create(secHubServerUrl);
+
+            /* @formatter:off */
+            client = DefaultSecHubClient.builder()
+                    .server(serverUri)
+                    .user(userId)
+                    .apiToken(apiToken)
+                    .trustAll(trustAllCertificates)
+                    .build();
+            /* @formatter:on */
+
+        } finally {
+            this.client = client;
+        }
+    }
+
+    private boolean isInputMissingOrEmpty(String secHubServerUrl, String userId, String apiToken) {
+        return secHubServerUrl.isBlank() || userId == null || apiToken == null;
     }
 }

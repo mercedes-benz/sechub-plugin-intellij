@@ -19,10 +19,10 @@
         <toolWindow id="SecHub" icon="/icons/toolWindowSecHub.svg" factoryClass="com.mercedesbenz.sechub.plugin.idea.window.SecHubToolWindowFactory" anchor="left"/>
 
         <!-- Extension for storing server credentials (package need to be in main/java) -->
-        <applicationService serviceImplementation="com.mercedesbenz.sechub.sdk.settings.AppSettings"/>
+        <applicationService serviceImplementation="com.mercedesbenz.sechub.settings.SechubSettings"/>
 
-        <applicationConfigurable parentId="tools" instance="com.mercedesbenz.sechub.sdk.settings.AppSettingsConfigurable"
-                                 id="com.mercedesbenz.sechub.sdk.settings.AppSettingsConfigurable"
+        <applicationConfigurable parentId="tools" instance="com.mercedesbenz.sechub.settings.SechubSettingsConfigurable"
+                                 id="com.mercedesbenz.sechub.settings.SechubSettingsConfigurable"
                                  displayName="SecHub"/>
     </extensions>
 
