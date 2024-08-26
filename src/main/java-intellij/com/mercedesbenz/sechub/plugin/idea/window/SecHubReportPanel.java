@@ -36,7 +36,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.UUID;
 
-public class SecHubReportPanel {
+public class SecHubReportPanel implements SecHubPanel {
     private static final Logger LOG = Logger.getInstance(SecHubReportPanel.class);
     private static final int SECHUB_REPORT_DEFAULT_GAP = 5;
     private static SecHubReportPanel INSTANCE;
@@ -398,7 +398,7 @@ public class SecHubReportPanel {
         showInEditorSupport.showInEditor(toolWindow, callStep);
     }
 
-
+    @Override
     public JPanel getContent() {
         return contentPanel;
     }
