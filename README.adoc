@@ -2,6 +2,8 @@
 Please do not create a pull request here, for contributions to the plugin see https://github.com/mercedes-benz/sechub/tree/develop/ide-plugins/jetbrains.
 If you want to create an issue related to this plugin, please use the issue tracker of the SecHub repository: https://github.com/mercedes-benz/sechub/issues.
 
+The repository is now archived because we use now mono repo: https://github.com/mercedes-benz/sechub/
+
 === License
 
 This project is licensed under the link:LICENSE[MIT LICENSE].
